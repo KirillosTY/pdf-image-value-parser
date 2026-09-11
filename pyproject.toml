@@ -1,0 +1,85 @@
+[project]
+name = "figure_parser"
+version = "0.0.1"
+description = "This extracts images and values from charts contained in pdfs"
+authors = [
+    { name = "Kirillos Tadrous-Attia", email = "kirillosTY@github.com" },
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "docling==2.126.0",
+    "langgraph>=1.0.0",
+    "openai>=3.13.0",
+    "pypdf>=6,<7",
+    "python-dotenv>=1.0.1",
+    "redis>=8.1.0",
+    "redisvl>=0.27.2",
+]
+
+
+[project.optional-dependencies]
+dev = ["mypy>=1.11.1", "ruff>=0.6.1"]
+
+[build-system]
+requires = ["setuptools>=83.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "langgraph.templates.agent",
+    "agent",
+    "figure_parser",
+    "parser",
+    "parser.src",
+    "parser.src.docling",
+    "parser.src.redis",
+    "parser.src.vlm",
+]
+[tool.setuptools.package-dir]
+"langgraph.templates.agent" = "src/agent"
+"agent" = "src/agent"
+"figure_parser" = "src/docling"
+"parser" = "src/parser"
+"parser.src" = "src/parser/src"
+"parser.src.docling" = "src/docling"
+"parser.src.redis" = "src/redis"
+"parser.src.vlm" = "src/vlm"
+
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.ruff]
+lint.select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "D",    # pydocstyle
+    "D401", # First line should be in imperative mood
+    "T201",
+    "UP",
+]
+lint.ignore = [
+    "UP006",
+    "UP007",
+    # We actually do want to import from typing_extensions
+    "UP035",
+    # Relax the convention by _not_ requiring documentation for every function parameter.
+    "D417",
+    "E501",
+]
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "UP"]
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[dependency-groups]
+dev = [
+    "anyio>=4.7.0",
+    "langgraph-cli[inmem]>=0.4.14",
+    "mypy>=1.13.0",
+    "pytest>=9.0.3",
+    "ruff>=0.8.2",
+]
