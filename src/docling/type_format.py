@@ -20,6 +20,14 @@ class ImageMeta:
     height: int
     class_name: str | None = None
     confidence: float | None = None
+    vlm_status: Literal["not_started", "processing", "complete", "failed"] = (
+        "not_started"
+    )
+    vlm_result: dict[str, Any] | None = None
+    format_status: Literal["not_started", "processing", "complete", "failed"] = (
+        "not_started"
+    )
+    formatting: dict[str, Any] | None = None
 
 
 @dataclass
@@ -74,6 +82,8 @@ class DocumentMetadata:
     abstract: str | None = None
     evidence: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
+    organization: str | None = None
+    publication_date: str | None = None
 
 
 @dataclass
@@ -92,6 +102,7 @@ class Manifest:
         "no_assets",
         "partial_failure",
         "failed_processing",
+        "already_stored",
     ]
     manifest_key: str
     assets: list[Asset] = field(default_factory=list)
@@ -103,3 +114,8 @@ class Manifest:
     document_metadata: DocumentMetadata | None = None
     page_count: int | None = None
     finished_at: str | None = None
+    format_status: Literal["not_started", "processing", "complete", "failed"] = (
+        "not_started"
+    )
+    db_status: Literal["not_started", "complete"] = "not_started"
+    run_id: str | None = None

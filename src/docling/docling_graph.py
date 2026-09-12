@@ -5,9 +5,13 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
-from parser.src.docling.docling_tool import DEFAULT_IMAGES, DocumentWorker, ExtractionConfig
 from langgraph.config import get_stream_writer
 from langgraph.graph import END, START, StateGraph
+from parser.src.docling.docling_tool import (
+    DEFAULT_IMAGES,
+    DocumentWorker,
+    ExtractionConfig,
+)
 from typing_extensions import TypedDict
 
 
@@ -19,28 +23,51 @@ class ExtractionState(TypedDict, total=False):
     config: dict[str, Any]
     recursive: bool
     run_id: str
+    database_url: str
+    resume: bool
     counts: dict[str, int]
 
 
 def extract_folder(state: ExtractionState) -> dict[str, Any]:
     """Stream per-document completion events and return a bounded summary."""
     writer = get_stream_writer()
+    database_engine = None
+    if state.get("database_url"):
+        from parser.src.db.runs import require_incomplete_run, start_run
+        from sqlalchemy import create_engine
+
+        database_engine = create_engine(state["database_url"])
     worker = DocumentWorker(
         state.get("output_dir", str(DEFAULT_IMAGES)),
         ExtractionConfig(**state.get("config", {})),
-        on_document=writer,
+        run_id=state.get("run_id"),
     )
+    if database_engine is not None:
+        if state.get("resume"):
+            require_incomplete_run(database_engine, worker.run_id)
+        else:
+            start_run(database_engine, run_id=worker.run_id)
     counts: Counter[str] = Counter()
-    for event in worker.iter_folder(
-        state["input_path"],
-        recursive=state.get("recursive", False),
-    ):
-        counts[event["status"]] += 1
-    return {
-        "run_id": worker.run_id,
-        "counts": dict(counts),
-        "output_dir": str(worker.output_dir),
-    }
+    try:
+        manifests = worker.process_folder(
+            state["input_path"],
+            recursive=state.get("recursive", False),
+            database_engine=database_engine,
+            resume=state.get("resume", False),
+        )
+        for manifest in manifests:
+            event = {
+                "status": manifest.status,
+                "run_id": worker.run_id,
+                "document_id": manifest.document_id,
+                "manifest_key": manifest.manifest_key,
+            }
+            counts[manifest.status] += 1
+            writer(event)
+        return {"run_id": worker.run_id, "counts": dict(counts)}
+    finally:
+        if database_engine is not None:
+            database_engine.dispose()
 
 
 graph = (

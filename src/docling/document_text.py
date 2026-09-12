@@ -247,6 +247,8 @@ def document_metadata(path: Path, blocks: list[dict[str, Any]]) -> dict[str, Any
         "abstract": None,
         "evidence": {},
         "warnings": [],
+        "organization": None,
+        "publication_date": None,
     }
 
     def set_field(name: str, content: Any, source: Any) -> None:
@@ -273,6 +275,10 @@ def document_metadata(path: Path, blocks: list[dict[str, Any]]) -> dict[str, Any
                     "pdf.xmp.dc:title",
                 )
                 set_field("authors", xmp.dc_creator, "pdf.xmp.dc:creator")
+                publisher = getattr(xmp, "dc_publisher", None) or []
+                if isinstance(publisher, str):
+                    publisher = [publisher]
+                set_field("organization", next(iter(publisher), None), "pdf.xmp.dc:publisher")
                 # pypdf preserves the XML tree, including publisher-specific fields.
                 for node in xmp.rdf_root.getElementsByTagName("*"):
                     ns = node.namespaceURI or ""
@@ -288,6 +294,7 @@ def document_metadata(path: Path, blocks: list[dict[str, Any]]) -> dict[str, Any
                         elif local == "doi" and DOI.fullmatch(content):
                             set_field("doi", content, "pdf.xmp.prism:doi")
                         elif local == "publicationDate" and re.match(r"\d{4}", content):
+                            set_field("publication_date", content, "pdf.xmp.prism:publicationDate")
                             set_field(
                                 "publication_year",
                                 int(content[:4]),
@@ -341,6 +348,13 @@ def document_metadata(path: Path, blocks: list[dict[str, Any]]) -> dict[str, Any
             authors = re.match(r"\s*authors?\s*:\s*(.+)", text, re.I)
             if authors:
                 set_field("authors", [authors[1]], block)
+            organization = re.match(
+                r"\s*(?:organization|institution|company|publisher)\s*:\s*(.+)",
+                text,
+                re.I,
+            )
+            if organization:
+                set_field("organization", organization[1], block)
 
     abstract: list[dict[str, Any]] = []
     collecting = False

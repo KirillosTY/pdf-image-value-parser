@@ -1,17 +1,10 @@
-"""Define JSON Schemas that force valid VLM structured output per chart family.
+"""Define predefined chart schemas for post-VLM formatting and validation.
 
-Each entry is a plain JSON Schema ``dict`` so it drops straight into Ollama's
-``format`` field when the VLM extracts a chart. The organising idea is that a
-*chart type* is not a schema: what fixes the shape of the output is the *data
-family* the chart belongs to, and many chart types share one family (a grouped
-bar and a stacked bar are both ``category``/``series``/``value``). So the data
-item schemas below are defined once per family and reused, while a shared
-``_METADATA_PROPS`` block (title, axis labels, unit, orientation, stacking,
-source) spreads into every schema. Only the data array shape changes.
-
-The exported :data:`CHART_SCHEMAS` maps each chart type to its schema, and
-:func:`schema_for` resolves a Docling classification label to the right schema,
-falling back to ``UNKNOWN`` for anything Docling routes to ``other``.
+NuExtract receives a template derived from these schemas. The original VLM
+receives no schema and returns unrestricted observations. Schemas share data
+families, while CHART_SCHEMAS identifies the selected chart type. schema_for
+provides initial routing from a Docling label; callers can select a different
+schema explicitly. Unmatched observations remain outside the typed chart data.
 """
 
 from __future__ import annotations
@@ -20,7 +13,7 @@ from __future__ import annotations
 # Shared metadata
 # --------------------------------------------------------------------------- #
 # Optional descriptors common to every chart. They are never ``required`` so the
-# VLM may omit any it cannot read from the figure. ``orientation`` and
+# formatter may omit any absent from the VLM observations. ``orientation`` and
 # ``stacking`` are only meaningful for some families but stay uniform here so a
 # single block spreads into all schemas.
 _METADATA_PROPS: dict[str, dict] = {
@@ -301,7 +294,7 @@ def schema_for(class_name: str | None) -> dict:
     """Return the schema for a Docling classification label, or ``UNKNOWN``.
 
     Matching is case-insensitive; an unrecognised or missing label resolves to
-    the ``UNKNOWN`` fallback so the VLM always receives a valid ``format``.
+    the ``UNKNOWN`` fallback for the formatting worker.
     """
     if not class_name:
         return UNKNOWN

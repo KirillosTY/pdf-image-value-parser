@@ -16,6 +16,9 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "redis>=8.1.0",
     "redisvl>=0.27.2",
+    "jsonschema>=4.26,<5",
+    "sqlalchemy>=2,<3",
+    "psycopg[binary]>=3,<4",
 ]
 
 
@@ -27,6 +30,7 @@ requires = ["setuptools>=83.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
+py-modules = ["schema_format"]
 packages = [
     "langgraph.templates.agent",
     "agent",
@@ -36,8 +40,11 @@ packages = [
     "parser.src.docling",
     "parser.src.redis",
     "parser.src.vlm",
+    "parser.src.formatter",
+    "parser.src.db",
 ]
 [tool.setuptools.package-dir]
+"" = "src"
 "langgraph.templates.agent" = "src/agent"
 "agent" = "src/agent"
 "figure_parser" = "src/docling"
@@ -46,6 +53,8 @@ packages = [
 "parser.src.docling" = "src/docling"
 "parser.src.redis" = "src/redis"
 "parser.src.vlm" = "src/vlm"
+"parser.src.formatter" = "src/formatter"
+"parser.src.db" = "src/db"
 
 
 [tool.setuptools.package-data]
@@ -77,6 +86,7 @@ convention = "google"
 
 [dependency-groups]
 dev = [
+    "fakeredis[lua]>=2.34,<3",
     "anyio>=4.7.0",
     "langgraph-cli[inmem]>=0.4.14",
     "mypy>=1.13.0",

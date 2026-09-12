@@ -27,6 +27,7 @@ from figure_parser.type_format import (
     Manifest,
     TextSnippet,
 )
+from parser.src.docling.document_identity import make_document_id
 from parser.src.redis.state import create_manifest_key, queue_manifest, store_image
 
 LOG = logging.getLogger(__name__)
@@ -104,17 +105,18 @@ def asset_name(kind: str, label: tuple[str, str] | None) -> str:
     return f"{kind} {label[1]}".lower() if label else kind
 
 
-def new_manifest(pdf_path: Path, document_id: str | None) -> Manifest:
+def new_manifest(pdf_path: Path, pdf_sha256: str | None, *, run_id: str) -> Manifest:
     """Start a manifest header before extraction fills it in."""
     return Manifest(
         schema_version=2,
-        document_id=document_id,
-        pdf_sha256=document_id,
+        document_id=None,
+        pdf_sha256=pdf_sha256,
         source_path=str(pdf_path),
         name=pdf_path.stem,
         started_at=minute_timestamp(),
         status="processing",
-        manifest_key=create_manifest_key(document_id or "unreadable"),
+        manifest_key=create_manifest_key(pdf_sha256 or "unreadable"),
+        run_id=run_id,
     )
 
 
@@ -231,10 +233,15 @@ class DocumentWorker:
         self,
         output_dir: Path | str = DEFAULT_IMAGES,
         config: ExtractionConfig | None = None,
+        *,
+        run_id: str | None = None,
     ):
         """Validate the configuration and defer Docling until first use."""
         self.output_dir = Path(output_dir).expanduser().resolve()
         self.config = config or ExtractionConfig()
+        self.run_id = run_id or hashlib.sha256(
+            f"run:{datetime.now(timezone.utc).isoformat()}".encode()
+        ).hexdigest()[:32]
         if self.config.device not in {"auto", "cpu", "cuda", "mps"}:
             raise ValueError("device must be auto, cpu, cuda, or mps")
         if min(self.config.image_dpi, self.config.batch_size) <= 0:
@@ -289,14 +296,20 @@ class DocumentWorker:
             raise RuntimeError(f"Docling conversion status: {conversion_status}")
 
         document = result.document
+        blocks = text_blocks(document)
+        manifest.document_metadata = read_document_metadata(pdf_path, blocks)
+        manifest.document_id = make_document_id(
+            manifest.document_metadata,
+            run_id=self.run_id,
+            filename=pdf_path.name,
+        )
         context = ExtractionContext(
             document=document,
-            blocks=text_blocks(document),
+            blocks=blocks,
             document_id=manifest.document_id,
             manifest_key=manifest.manifest_key,
             config=self.config,
         )
-        manifest.document_metadata = read_document_metadata(pdf_path, context.blocks)
         manifest.page_count = len(document.pages)
 
         for order, (item, _) in enumerate(document.iterate_items()):
@@ -311,19 +324,42 @@ class DocumentWorker:
 
         manifest.status = final_status(manifest, conversion_status)
 
-    def process_pdf(self, source: Path | str) -> Manifest:
+    def process_pdf(
+        self,
+        source: Path | str,
+        *,
+        database_engine=None,
+        resume: bool = False,
+    ) -> Manifest:
         """Read one PDF and queue its completed manifest in Redis."""
+        if resume and database_engine is None:
+            raise ValueError("database_engine is required when resuming a run")
         pdf_path = Path(source).expanduser().resolve()
         try:
             document_id = sha256_of_file(pdf_path)
         except OSError:
             document_id = None
-        manifest = new_manifest(pdf_path, document_id)
+        manifest = new_manifest(pdf_path, document_id, run_id=self.run_id)
         try:
             if document_id is None:
                 raise OSError(f"Could not read {pdf_path}")
             manifest.docling_version = importlib.metadata.version("docling")
             self._extract(pdf_path, manifest)
+            if manifest.document_id is None:
+                metadata = manifest.document_metadata or DocumentMetadata()
+                manifest.document_id = make_document_id(
+                    metadata,
+                    run_id=self.run_id,
+                    filename=pdf_path.name,
+                )
+            if resume and database_engine is not None:
+                from parser.src.db.runs import document_is_stored_for_resume
+
+                if document_is_stored_for_resume(
+                    database_engine, self.run_id, manifest.document_id
+                ):
+                    manifest.status = "already_stored"
+                    manifest.db_status = "complete"
         except Exception as exc:
             manifest.status = "failed_processing"
             manifest.errors.append(f"{type(exc).__name__}: {exc}")
@@ -334,7 +370,12 @@ class DocumentWorker:
         return manifest
 
     def process_folder(
-        self, source: Path | str, *, recursive: bool = False
+        self,
+        source: Path | str,
+        *,
+        recursive: bool = False,
+        database_engine=None,
+        resume: bool = False,
     ) -> list[Manifest]:
         """Extract every PDF under a path and return their manifests."""
         root = Path(source).expanduser().resolve()
@@ -346,7 +387,11 @@ class DocumentWorker:
             else (root.rglob("*") if recursive else root.iterdir())
         )
         return [
-            self.process_pdf(candidate)
+            self.process_pdf(
+                candidate,
+                database_engine=database_engine,
+                resume=resume,
+            )
             for candidate in candidates
             if candidate.is_file() and candidate.suffix.lower() == ".pdf"
         ]

@@ -1,11 +1,9 @@
 import json
-from pathlib import Path
 
 import pytest
 from figure_parser.docling_tool import (
     DocumentWorker,
     ExtractionConfig,
-    choose_picture,
 )
 from figure_parser.document_text import (
     context_for,
@@ -13,6 +11,14 @@ from figure_parser.document_text import (
     references,
     text_blocks,
 )
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.compiler import compiles
+
+
+@compiles(JSONB, "sqlite")
+def compile_jsonb_for_sqlite(type_, compiler, **kwargs):
+    """Use SQLite JSON when exercising run recovery locally."""
+    return "JSON"
 
 
 @pytest.mark.parametrize(
@@ -138,57 +144,18 @@ def test_empty_formula_is_kept_and_existing_original_text_is_used():
     assert all(b["label"] == "formula" for b in blocks)
 
 
-@pytest.mark.parametrize(
-    "confidence,destination",
-    [(0.79, "below_threshold"), (0.80, "accepted"), (0.95, "accepted")],
-)
-def test_only_highest_prediction_passes_threshold(confidence, destination):
-    predictions = [
-        {"class_name": "bar_chart", "confidence": 0.01},
-        {
-            "class_name": "line_chart",
-            "confidence": confidence,
-            "created_by": "classifier",
-        },
-    ]
-    selected, route = choose_picture(predictions, ExtractionConfig())
-    assert route == destination
-    assert selected == (
-        {"class_name": "line_chart", "confidence": confidence}
-        if confidence >= 0.8
-        else None
-    )
+@pytest.fixture
+def redis_client(monkeypatch):
+    import fakeredis
+    from parser.src.redis import state
+
+    client = fakeredis.FakeRedis()
+    monkeypatch.setattr(state, "red", client)
+    return client
 
 
-def test_missing_classification_and_confident_photograph():
-    assert choose_picture([], ExtractionConfig()) == (None, "discarded")
-    photo = {"class_name": "photograph", "confidence": 0.91}
-    assert choose_picture(
-        [photo, {"class_name": "line_chart", "confidence": 0.08}], ExtractionConfig()
-    ) == (photo, "discarded")
-    assert (
-        choose_picture(
-            [{"class_name": "line_chart", "confidence": 0.6}],
-            ExtractionConfig(classification_threshold=0.5),
-        )[1]
-        == "accepted"
-    )
-
-
-@pytest.mark.parametrize(
-    "class_name", ["photograph", "flow_chart", "other", "engineering_drawing"]
-)
-@pytest.mark.parametrize("confidence", [0.6, 0.95])
-def test_non_chart_classes_never_reach_either_image_folder(class_name, confidence):
-    assert (
-        choose_picture(
-            [{"class_name": class_name, "confidence": confidence}], ExtractionConfig()
-        )[1]
-        == "discarded"
-    )
-
-
-def test_image_routing_and_metadata_export(tmp_path):
+def test_extracted_images_and_manifest_are_saved_in_redis(tmp_path, redis_client):
+    from io import BytesIO
     from types import SimpleNamespace
 
     from docling_core.types.doc import (
@@ -200,7 +167,7 @@ def test_image_routing_and_metadata_export(tmp_path):
         TableData,
     )
     from docling_core.types.doc.base import BoundingBox, CoordOrigin, Size
-    from docling_core.types.doc.document import DocItemLabel, ProvenanceItem
+    from docling_core.types.doc.document import ProvenanceItem
     from PIL import Image
 
     doc = DoclingDocument(name="test")
@@ -214,159 +181,131 @@ def test_image_routing_and_metadata_export(tmp_path):
         charspan=(0, 0),
         bbox=BoundingBox(l=100, t=100, r=400, b=200, coord_origin=CoordOrigin.TOPLEFT),
     )
-    doc.add_text(label=DocItemLabel.TITLE, text="A Test Paper", prov=prov)
-    caption = doc.add_text(
-        label=DocItemLabel.CAPTION, text="Figure 1: A chart", prov=prov
-    )
-    for score in [0.95, 0.79]:
-        picture = doc.add_picture(prov=prov, caption=caption)
-        picture.meta = PictureMeta(
-            classification=PictureClassificationMetaField(
-                predictions=[
-                    PictureClassificationPrediction(
-                        class_name="bar_chart", confidence=0.01, created_by="test"
-                    ),
-                    PictureClassificationPrediction(
-                        class_name="line_chart", confidence=score, created_by="test"
-                    ),
-                ]
-            )
+    picture = doc.add_picture(prov=prov)
+    picture.meta = PictureMeta(
+        classification=PictureClassificationMetaField(
+            predictions=[
+                PictureClassificationPrediction(
+                    class_name="line_chart", confidence=0.95, created_by="test"
+                )
+            ]
         )
+    )
     doc.add_table(data=TableData(num_rows=0, num_cols=0, table_cells=[]), prov=prov)
     source = tmp_path / "paper.pdf"
     source.write_bytes(b"mock conversion input")
-    worker = DocumentWorker(tmp_path / "images")
+    worker = DocumentWorker(config=ExtractionConfig(device="cpu"))
     worker._converter = SimpleNamespace(
         convert=lambda *args, **kwargs: SimpleNamespace(
             status="success", errors=[], document=doc
         )
     )
-    event = worker.process_pdf(source)
-    manifest = json.loads(Path(event["manifest_path"]).read_text())
-    assert event["asset_count"] == 2 and event["below_threshold_count"] == 1
-    assert manifest["assets"][0]["classification"] == {
-        "class_name": "line_chart",
-        "confidence": 0.95,
-    }
-    assert manifest["assets"][1]["kind"] == "table"
-    below = manifest["below_threshold"][0]
-    assert below["classification"] is None
-    assert Path(below["images"][0]["path"]).is_relative_to(tmp_path / "below_treshold")
-    for asset in [*manifest["assets"], below]:
-        assert Path(asset["images"][0]["path"]).is_file()
-        assert asset["provenance"] == [{"page_number": 1}]
 
-    def check_no_coordinates(record):
-        if isinstance(record, dict):
-            assert not {"bbox", "coord_origin", "bounding_box"}.intersection(record)
-            for v in record.values():
-                check_no_coordinates(v)
-        elif isinstance(record, list):
-            for v in record:
-                check_no_coordinates(v)
-
-    check_no_coordinates(manifest)
+    result = worker.process_pdf(source)
+    assert result.status == "completed"
+    saved = json.loads(redis_client.get(result.manifest_key))
+    assert len(saved["assets"]) == 2
+    assert saved["db_status"] == "not_started"
+    for asset in saved["assets"]:
+        image = asset["images_meta"][0]
+        assert image["manifest_key"] == result.manifest_key
+        assert image["vlm_status"] == "not_started"
+        assert "db_status" not in image
+        stored = redis_client.hgetall(image["redis_key"])
+        assert stored[b"manifest_key"].decode() == result.manifest_key
+        with Image.open(BytesIO(stored[b"png"])) as crop:
+            assert crop.format == "PNG"
+            assert crop.size == (image["width"], image["height"])
+    stream = redis_client.xrange("pdf:ready")
+    assert len(stream) == 1
+    assert stream[0][1][b"manifest_key"].decode() == result.manifest_key
+    assert list(tmp_path.iterdir()) == [source]
 
 
 class FakeWorker(DocumentWorker):
-    calls = 0
+    def _extract(self, path, manifest):
+        from figure_parser.type_format import Asset
 
-    def _extract(self, path, folder, manifest):
-        self.calls += 1
         if path.read_bytes() == b"bad":
             raise ValueError("Corrupt test PDF")
-        image = folder / "test.png"
-        image.write_bytes(b"image content")
-        manifest["assets"] = [
-            {
-                "asset_id": manifest["document_id"] + "-1",
-                "status": "completed",
-                "image_path": str(image),
-            }
-        ]
-        manifest["status"] = "completed"
+        if path.read_bytes() == b"empty":
+            manifest.status = "no_assets"
+            return
+        manifest.assets = [Asset(asset_id="test", name="figure", status="completed")]
+        manifest.status = "completed"
 
 
-def test_each_pdf_notifies_and_failure_does_not_stop_folder(tmp_path):
-    source = tmp_path / "input"
-    source.mkdir()
-    for name, data in [("a.pdf", b"good"), ("b.PDF", b"bad"), ("c.pdf", b"another")]:
-        (source / name).write_bytes(data)
-    events = []
-
-    def callback(event):
-        assert Path(event["manifest_path"]).is_file()
-        events.append(event)
-
-    worker = FakeWorker(tmp_path / "images", on_document=callback)
-    results = list(worker.iter_folder(source))
-    assert len(events) == len(results) == 3
-    assert sorted(e["status"] for e in results) == [
-        "completed",
+def test_folder_continues_after_bad_pdf_and_only_queues_successes(
+    tmp_path, redis_client
+):
+    for name, data in [("a.pdf", b"good"), ("b.PDF", b"bad"), ("c.pdf", b"empty")]:
+        (tmp_path / name).write_bytes(data)
+    (tmp_path / "ignored.txt").write_text("not a PDF")
+    results = FakeWorker().process_folder(tmp_path)
+    assert sorted(result.status for result in results) == [
         "completed",
         "failed_processing",
+        "no_assets",
     ]
-    assert sum(e["ready"] for e in results) == 2
+    stream = redis_client.xrange("pdf:ready")
+    assert len(stream) == 1
+    completed = next(result for result in results if result.status == "completed")
+    assert stream[0][1][b"manifest_key"].decode() == completed.manifest_key
+    for result in results:
+        if result.status != "completed":
+            assert redis_client.get(result.manifest_key) is None
 
 
-def test_retry_keeps_document_id_and_both_attempts(tmp_path):
+def test_retry_preserves_document_identity_and_creates_new_manifest(
+    tmp_path, redis_client
+):
     source = tmp_path / "paper.pdf"
     source.write_bytes(b"paper")
-    worker = FakeWorker(tmp_path / "images")
+    worker = FakeWorker()
     first, second = worker.process_pdf(source), worker.process_pdf(source)
-    assert first["document_id"] == second["document_id"]
-    assert first["attempt_id"] != second["attempt_id"]
-    assert Path(first["manifest_path"]).is_file()
-    assert Path(second["manifest_path"]).is_file()
+    assert first.document_id == second.document_id
+    assert first.manifest_key != second.manifest_key
+    assert redis_client.exists(first.manifest_key, second.manifest_key) == 2
 
 
-def test_notification_failure_preserves_extraction(tmp_path):
+def test_missing_pdf_returns_failure_without_queueing(tmp_path, redis_client):
+    result = FakeWorker().process_pdf(tmp_path / "missing.pdf")
+    assert result.status == "failed_processing"
+    assert result.errors
+    assert redis_client.xlen("pdf:ready") == 0
+
+
+def test_resume_skips_only_a_document_stored_in_the_same_incomplete_run(
+    tmp_path, redis_client
+):
+    from parser.src.db import runs, tables
+    from sqlalchemy import create_engine
+
+    engine = create_engine("sqlite://")
+    tables.metadata.create_all(engine)
+    run_id = runs.start_run(engine, run_id="run-a")
     source = tmp_path / "paper.pdf"
     source.write_bytes(b"paper")
-
-    def callback(event):
-        raise ConnectionError("Redis unavailable")
-
-    event = FakeWorker(tmp_path / "images", on_document=callback).process_pdf(source)
-    saved = json.loads(Path(event["manifest_path"]).read_text())
-    assert event["ready"]
-    assert "Redis unavailable" in saved["notification_error"]
-
-
-def test_missing_source_has_failure_manifest(tmp_path):
-    event = FakeWorker(tmp_path / "images").process_pdf(tmp_path / "missing.pdf")
-    assert event["status"] == "failed_processing"
-    assert Path(event["manifest_path"]).is_file()
-
-
-def test_no_assets_is_success(tmp_path):
-    class EmptyWorker(FakeWorker):
-        def _extract(self, path, folder, manifest):
-            manifest["status"] = "no_assets"
-
-    source = tmp_path / "paper.pdf"
-    source.write_bytes(b"paper")
-    result = EmptyWorker(tmp_path / "images").process_pdf(source)
-    assert result["ready"] and result["asset_count"] == 0
-
-
-def test_langgraph_streams_a_failure_before_returning_summary(tmp_path, monkeypatch):
-    import figure_parser.docling_graph
-    from figure_parser.docling_graph import graph
-
-    monkeypatch.setattr(figure_parser.docling_graph, "DocumentWorker", FakeWorker)
-
-    source = tmp_path / "pdfs"
-    source.mkdir()
-    (source / "broken.pdf").write_bytes(b"bad")
-    events = list(
-        graph.stream(
-            {"input_path": str(source), "output_dir": str(tmp_path / "images")},
-            stream_mode="custom",
+    first = FakeWorker(run_id=run_id).process_pdf(source)
+    redis_client.flushall()
+    with engine.begin() as connection:
+        connection.execute(
+            tables.documents.insert().values(
+                manifest_key="stored-manifest",
+                document_id=first.document_id,
+                run_id=run_id,
+                pdf_sha256=first.pdf_sha256,
+                source_path=str(source),
+                metadata={},
+                snapshot_hash="stored-snapshot",
+            )
         )
+    resumed = FakeWorker(run_id=run_id).process_pdf(
+        source, database_engine=engine, resume=True
     )
-    assert len(events) == 1
-    assert events[0]["status"] == "failed_processing"
+    assert resumed.status == "already_stored"
+    assert resumed.db_status == "complete"
+    assert redis_client.xlen("pdf:ready") == 0
 
 
 def test_caption_fallback_uses_the_exact_span_and_rejects_body_mentions():
