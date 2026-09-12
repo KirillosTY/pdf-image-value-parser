@@ -747,12 +747,6 @@ dependencies = [
     { name = "sqlalchemy" },
 ]
 
-[package.optional-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "ruff" },
-]
-
 [package.dev-dependencies]
 dev = [
     { name = "anyio" },
@@ -769,17 +763,14 @@ requires-dist = [
     { name = "docling", specifier = "==2.126.0" },
     { name = "jsonschema", specifier = ">=4.26,<5" },
     { name = "langgraph", specifier = ">=1.0.0" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.11.1" },
     { name = "openai", specifier = ">=3.13.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3,<4" },
     { name = "pypdf", specifier = ">=6,<7" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "redis", specifier = ">=8.1.0" },
     { name = "redisvl", specifier = ">=0.27.2" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.1" },
     { name = "sqlalchemy", specifier = ">=2,<3" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
 dev = [

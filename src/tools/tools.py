@@ -1,1 +1,1 @@
-    
+"""Shared tool helpers (placeholder)."""

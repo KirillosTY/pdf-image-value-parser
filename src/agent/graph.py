@@ -87,10 +87,14 @@ def build_graph(*, checkpointer=None):
         .add_node("dispatch_action", dispatch_action)
         .add_node("acknowledge_event", acknowledge_event)
         .add_node("finish_run", finish_run)
+
+        
         .add_edge(START, "initialize")
         .add_edge("initialize", "ensure_redis")
         .add_edge("ensure_redis", "start_docling")
         .add_edge("start_docling", "coordinate_pipeline")
+
+
         .add_conditional_edges("coordinate_pipeline", route_actions,
                                ["dispatch_action", "acknowledge_event"])
         .add_conditional_edges("dispatch_action", route_actions,

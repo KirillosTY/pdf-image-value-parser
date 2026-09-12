@@ -8,6 +8,21 @@ authors = [
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
+keywords = ["pdf", "charts", "figures", "data-extraction", "docling", "vlm", "ocr"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Text Processing",
+]
 dependencies = [
     "docling==2.126.0",
     "langgraph>=1.0.0",
@@ -21,10 +36,6 @@ dependencies = [
     "psycopg[binary]>=3,<4",
 ]
 
-
-[project.optional-dependencies]
-dev = ["mypy>=1.11.1", "ruff>=0.6.1"]
-
 [build-system]
 requires = ["setuptools>=83.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -32,7 +43,6 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 py-modules = ["schema_format"]
 packages = [
-    "langgraph.templates.agent",
     "agent",
     "figure_parser",
     "parser",
@@ -45,7 +55,6 @@ packages = [
 ]
 [tool.setuptools.package-dir]
 "" = "src"
-"langgraph.templates.agent" = "src/agent"
 "agent" = "src/agent"
 "figure_parser" = "src/docling"
 "parser" = "src/parser"
