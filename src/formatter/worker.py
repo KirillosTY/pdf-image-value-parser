@@ -4,7 +4,11 @@ from contextlib import contextmanager
 from uuid import uuid4
 
 from parser.src.formatter.model import FormattingError, NuExtractFormatter
-from parser.src.redis.state import update_manifest_image
+from parser.src.redis.state import (
+    find_manifest_image,
+    load_manifest,
+    update_manifest_image,
+)
 from redis.exceptions import LockNotOwnedError
 
 
@@ -18,6 +22,8 @@ def lock_n_update(client, manifest_key: str, image_key: str, schema: dict, model
         attempt_id = uuid4().hex
 
         def begin(image):
+            if image.get("failed"):
+                raise ValueError("Image has a terminal failure; create a new attempt")
             if image.get("format_status") == "complete":
                 raise ValueError(
                     "Image is already formatted; explicit reformatting is required"
@@ -60,6 +66,7 @@ def start_formatting(
     attempt_id: str,
     raw_output: str,
     schema: dict,
+    schema_reference: dict | None = None,
 ) -> dict:
     """Call the model and persist either validated output or the failure."""
 
@@ -86,7 +93,11 @@ def start_formatting(
 
     def complete(image):
         check_attempt(image)
-        image["formatting"] = {**result, "attempt_id": attempt_id}
+        image["formatting"] = {
+            **result,
+            "attempt_id": attempt_id,
+            **(schema_reference or {}),
+        }
         image["format_status"] = "complete"
 
     return update_manifest_image(client, manifest_key, image_key, complete)
@@ -98,9 +109,49 @@ def format_image(
     *,
     manifest_key: str,
     image_key: str,
-    schema: dict,
+    schema: dict | None = None,
+    database_engine=None,
+    schema_key: str | None = None,
 ) -> dict:
-    """Coordinate locking and formatting for a caller-selected schema."""
+    """Use the run's database schema; retain explicit schemas for standalone work."""
+    manifest = load_manifest(client, manifest_key)
+    reference = None
+    if manifest.get("run_id") and (
+        database_engine is not None or manifest.get("schema_id")
+    ):
+        if database_engine is None:
+            raise ValueError("database_engine is required to retrieve the run schema")
+        from parser.src.db.runs import load_run_context
+
+        context = load_run_context(database_engine, manifest["run_id"])
+        if manifest.get("schema_id") not in {None, context["schema_id"]}:
+            raise ValueError("Manifest schema does not belong to its run")
+        available = context["schema"]["formatter_schemas"]
+        if schema_key is None and schema is not None:
+            schema_key = next(
+                (key for key, value in available.items() if value == schema), None
+            )
+            if schema_key is None:
+                raise ValueError("The supplied schema is not part of this run")
+        if schema_key is None:
+            image = find_manifest_image(manifest, image_key)
+            schema_key = (
+                context["config"]
+                .get("schema_matcher", {})
+                .get(
+                    image.get("class_name"),
+                    context["config"].get("fallback_schema"),
+                )
+            )
+        if schema_key not in available:
+            raise ValueError("Select a formatter schema belonging to this run")
+        selected = available[schema_key]
+        if schema is not None and schema != selected:
+            raise ValueError("Supplied schema differs from the run's approved schema")
+        schema = selected
+        reference = {"schema_id": context["schema_id"], "schema_key": schema_key}
+    if schema is None:
+        raise ValueError("An explicit schema or a run database schema is required")
     with lock_n_update(client, manifest_key, image_key, schema, formatter.model) as (
         attempt_id,
         raw,
@@ -113,4 +164,5 @@ def format_image(
             attempt_id=attempt_id,
             raw_output=raw,
             schema=schema,
+            schema_reference=reference,
         )

@@ -1,149 +1,110 @@
-# New LangGraph Project
+# Figure parser
 
-## Scientific PDF extraction
+The local configuration uses the installed `qwen3-abliterated:latest` as its
+tool-calling MainAgent, with Qwen2.5-VL and Qwen2.5 for vision and formatting
+through Ollama. See [setup and schema](configuration/test-pdf.md) for the model aliases,
+endpoint, extracted fields, and retry policies.
 
-The extraction worker is in `src/docling/docling_tool.py`. It processes local PDFs
-sequentially, saves chart/table PNGs and a JSON manifest for each PDF, then calls
-an optional notification callback before advancing. Redis and numerical-data
-extraction belong to the later workflow and are not implemented here.
+The [additional model configuration](configuration/additional-models.md) adds
+Qwen3-VL 2B and Granite Vision 2B readers, plus Qwen2.5 3B and Llama 3.2 3B
+formatters. MainAgent thinking-based routing is enabled for both stages. The new
+VLMs' requested under-4-GB peak RAM usage remains unverified; testing is paused.
 
-```bash
-uv sync
-uv run python -m figure_parser.docling_tool /path/to/pdfs --device cuda
-```
+Extract chart and table images from PDFs with Docling, read them with configured
+vision models, format their observations against approved schemas, and store
+whole documents atomically in SQL.
 
-Use `--device mps` on an Apple Silicon Mac, `cpu` for CPU processing, or `auto`
-to let Docling choose. The first conversion downloads Docling's model weights.
-There are no external metadata lookups or VLM calls.
+## Configure and run
 
-Outputs are stored under
-`images/<pdf_name>__<hash_prefix>/<attempt_id>/`. PNG filenames identify the
-document, page, figure/table label when available, and asset ID. The manifest
-contains the PDF's SHA-256, source path, run/attempt IDs, document metadata,
-page numbers, captions, explicitly referencing paragraphs from across the
-paper, and nearby paragraphs. Explicit figure/table mentions join continuation
-blocks and existing equation text across columns/pages, keeping the surrounding
-paragraph when sentence boundaries are uncertain. Joined mentions include
-`item_refs` for their source blocks and all source page numbers. Existing LaTeX
-is preserved; missing equation text is marked `[equation text unavailable]`.
-No formula extraction model is enabled. Captions and nearby text keep their
-existing extraction behavior. PNG crops use
-Docling's detected figure/table regions, excluding separately detected captions.
-Figures are kept whole as detected; individual panels are not split intentionally.
+1. Install dependencies with `uv sync` and configure `.env` from `.env.example`.
+   Supply `REDIS_URL`, `DATABASE_URL`, and the endpoint/credential environment
+   variables named by your model configurations.
+2. Follow [configuration/README.md](configuration/README.md) to fill
+   `src/config.py` with the workload, model registry, hardware estimates, routing
+   and retry policies. This checkout now contains the approved English chart-test
+   setup; revisit those choices for a different workload. Models must expose the
+   configured chat or NuExtract protocol.
+3. Define a formatter/SQL bundle using [schemas/README.md](schemas/README.md).
+   For a fresh database, create the shared tables with
+   `parser.src.db.tables.metadata.create_all(engine)`. Existing databases require
+   the SQL migrations in `migrations/`, in order. Run creation registers the
+   approved bundle and saves an immutable configuration snapshot.
+4. Start Redis and externally served model endpoints, then execute:
 
-Missing bibliographic fields remain `null` or empty. Authors from a PDF's plain
-Author field may remain an unsplit string in the authors list. Metadata evidence
-is recorded at document level. Unlinked captions can be recovered from explicit
-labels and nearby coordinates; these links are marked `spatial_fallback`.
+   ```bash
+   uv run python -m agent /path/to/pdfs
+   ```
 
-Statuses are `processing`, `completed`, `no_assets`, `partial_failure`,
-`failed_processing`, or `interrupted`. Every invocation creates a new attempt;
-there is no automatic skipping, retry scheduler, or cache. A hard-killed process
-may leave `processing`, identifiable by its run and attempt IDs. Partial/failed
-PDFs have `ready: false`; the worker continues with the next PDF.
+Use `--run-id ID` for an approved run created with `start_run()` that has not yet
+started processing. For interruption recovery, use the checkpointed graph API
+and resume the same checkpoint as described in [MAIN_AGENT.md](MAIN_AGENT.md).
+The CLI does not install a durable checkpointer.
 
-To connect Redis later, supply `on_document(event)` to `DocumentWorker`. The
-callback receives a manifest path and completion status after saving finishes.
-If the callback raises, the manifest records `notification_error`; delivery is
-not retried automatically. Existing manifests can be used by your future retry
-or notification implementation.
+## Workflow
 
-For LangGraph Studio, run `uv run langgraph dev` and select `extract_documents`:
+The Studio graph now shows the actual stage sequence and both routing branches:
+Docling → MainAgent routing or direct routing → VLM → MainAgent formatter
+routing or direct routing → formatter → field mapping → database. The graph
+definition is exported in [main_agent_graph.mmd](architecture/main_agent_graph.mmd).
+VLM, formatter and SQL operations execute inside those named nodes. Docling
+continues producing in the background while bounded batches move through them.
 
-```json
-{"input_path": "/absolute/path/to/pdfs", "config": {"device": "cuda"}}
-```
+The MainAgent loads model and schema context from the run's database snapshot.
+Its model/tool loop selects chart → VLM and VLM → formatter mappings, creates run-specific model
+queues, and launches Docling. Processing starts at `manifest_minimum` ready
+manifests (1 in the local test setup; default 20), or when a smaller input
+finishes. The active manifest buffer is capped at 50.
 
-The compiled subgraph in `figure_parser.docling_graph` also supports
-`graph.stream(inputs, stream_mode="custom")` for per-PDF events. Its final state
-contains counts and the output folder, keeping images/text out of graph state.
-`ExtractionConfig` exposes resolution (216 DPI by default), layout batch size
-(2), and a classification threshold (`0.80` by default). One PDF's page images are retained during
-conversion, so memory use grows with that PDF's length; large-volume throughput
-has not been benchmarked. Docling's built-in classifier returns only its highest prediction (`top_k=1`).
-The accepted classes are `line_chart`, `bar_chart`, `pie_chart`, `scatter_plot`,
-`box_plot`, and `table`; other classes are discarded regardless of score. When its score meets the
-threshold, the manifest stores one `classification` object with `class_name` and
-`confidence`. Layout-detected tables are retained without inventing a classifier score.
+Each image is routed using configured mappings or MainAgent reasoning over its
+caption, mentions, nearby text, and the top three classification predictions.
+VLMs produce unrestricted observations. Formatters validate those observations
+against the run's approved schema and preserve unmapped observations. Separate
+retry counters prevent a formatter retry from repeating successful VLM work.
 
-Chart/table picture predictions below the cutoff are saved under
-`below_treshold/<pdf_name>__<hash_prefix>/<attempt_id>/`, beside the `images`
-folder. Their records are in the PDF manifest's `below_threshold` list with
-`classification: null`; they do not count as accepted assets. No bounding boxes
-are exported, including in captions, related text, and metadata evidence.
-Set another cutoff with `--threshold 0.80` or
-`config: {"classification_threshold": 0.80}` in the graph input.
+A resource scheduler drains compatible model queues concurrently. Configured
+managed processes are loaded and stopped within current RAM/VRAM budgets;
+external model endpoints use per-model request limits. A single model stage
+always routes directly; the MainAgent continues to orchestrate that run.
+An explicit `main_agent=None` runs setup and routing deterministically in the same stage graph.
 
-Two PDFs and their annotations from the
-[PDFFigures2 conference benchmark](https://github.com/allenai/pdffigures2/tree/master/evaluation)
-are available locally in `testing_data/pdffigures2/`. `sources.json` records their
-download URLs and hashes. These are a small extraction test sample, not a
-training corpus. All future downloaded test datasets belong in the project-root
-`testing_data/` folder. Generated images and downloaded PDFs are ignored by Git.
+Thinking-enabled stages prepare queues for all configured candidates. Both
+routing flags are independent; each direct branch skips per-item LLM routing.
+Models can run concurrently within a stage; each batch finishes its VLM stage
+before entering its formatter stage.
 
-```bash
-uv run python -m figure_parser.docling_tool testing_data/pdffigures2 --device cuda
-LANGSMITH_TEST_TRACKING=false LANGSMITH_TRACING=false uv run pytest tests -q
-```
+The writer commits complete documents in batches of up to 50 and flushes the
+final smaller batch after upstream work finishes. `approve_with_fails=False`
+blocks documents containing failed images; `"omit"` stores failed identities with
+empty extracted fields and retains successful images. Raw observations, model
+responses and unmapped values accompany successful permanent records. Redis
+retains retry and failure evidence. Run outcomes distinguish completion, item
+errors, and fatal failures.
 
-[![CI](https://github.com/langchain-ai/new-langgraph-project/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/langchain-ai/new-langgraph-project/actions/workflows/unit-tests.yml)
-[![Integration Tests](https://github.com/langchain-ai/new-langgraph-project/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/langchain-ai/new-langgraph-project/actions/workflows/integration-tests.yml)
-
-This template demonstrates a simple application implemented using [LangGraph](https://github.com/langchain-ai/langgraph), designed for showing how to get started with [LangGraph Server](https://langchain-ai.github.io/langgraph/concepts/langgraph_server/#langgraph-server) and using [LangGraph Studio](https://langchain-ai.github.io/langgraph/concepts/langgraph_studio/), a visual debugging IDE.
-
-<div align="center">
-  <img src="./static/studio_ui.png" alt="Graph view in LangGraph studio UI" width="75%" />
-</div>
-
-The main agent in `src/agent/graph.py` coordinates worker events and tracks PDF,
-VLM, formatting, and storage progress. See [MAIN_AGENT.md](MAIN_AGENT.md) for its
-state/event contract and remaining worker adapters. The exported graph currently
-stops at the first unwired service hook.
-
-You can extend this graph to orchestrate more complex agentic workflows that can be visualized and debugged in LangGraph Studio.
-
-## Getting Started
-
-1. Install dependencies, along with the [LangGraph CLI](https://langchain-ai.github.io/langgraph/concepts/langgraph_cli/), which will be used to run the server.
-
-```bash
-cd path/to/your/app
-pip install -e . "langgraph-cli[inmem]"
-```
-
-2. (Optional) Customize the code and project as needed. Create a `.env` file if you need to use secrets.
-
-```bash
-cp .env.example .env
-```
-
-If you want to enable LangSmith tracing, add your LangSmith API key to the `.env` file.
-
-```text
-# .env
-LANGSMITH_API_KEY=lsv2...
-```
-
-3. Start the LangGraph Server.
-
-```shell
-langgraph dev
-```
-
-For more information on getting started with LangGraph Server, [see here](https://langchain-ai.github.io/langgraph/tutorials/langgraph-platform/local-server/).
-
-## How to customize
-
-1. **Define runtime context**: Modify the `Context` class in the `graph.py` file to expose the arguments you want to configure per assistant. For example, in a chatbot application you may want to define a dynamic system prompt or LLM to use. For more information on runtime context in LangGraph, [see here](https://langchain-ai.github.io/langgraph/agents/context/?h=context#static-runtime-context).
-
-2. **Extend the graph**: The core logic of the application is defined in [graph.py](./src/agent/graph.py). You can modify this file to add new nodes, edges, or change the flow of information.
+See [MAIN_AGENT.md](MAIN_AGENT.md) for queue ownership, resource settings, recovery,
+and operational limitations; [architecture/response.md](architecture/response.md)
+contains the original requested workflow.
 
 ## Development
 
-While iterating on your graph in LangGraph Studio, you can edit past state and rerun your app from previous states to debug specific nodes. Local changes will be automatically applied via hot reload.
+```bash
+LANGSMITH_TEST_TRACKING=false LANGSMITH_TRACING=false uv run pytest tests -q
+uv run langgraph dev
+```
 
-Follow-up requests extend the same thread. You can create an entirely new thread, clearing previous history, using the `+` button in the top right.
+The `agent` graph is the complete pipeline; `extract_documents` is the standalone
+Docling graph. Tests exercise coordinator recovery, Redis queue behavior, routing,
+retry policies, schema validation and SQL transactions. Model responses and PDF
+conversion are simulated in the full-pipeline tests; those tests do not benchmark
+real model extraction accuracy.
 
-For more advanced features and examples, refer to the [LangGraph documentation](https://langchain-ai.github.io/langgraph/). These resources can help you adapt this template for your specific use case and build more sophisticated conversational agents.
+Tests are currently paused at the user's request. The new explicit-stage graph
+has only been exported for visual inspection, not exercised end to end. Start a
+new run/thread after this topology change; older coordinator checkpoints require
+their corresponding old graph implementation.
 
-LangGraph Studio also integrates with [LangSmith](https://smith.langchain.com/) for more in-depth tracing and collaboration with teammates, allowing you to analyze and optimize your chatbot's performance.
+Five scientific PDFs from the
+[PDFFigures2 benchmark](https://github.com/allenai/pdffigures2/tree/master/evaluation)
+are available locally in `testing_data/pdffigures2/`; `sources.json` records their
+URLs and hashes. These are extraction test samples, not training data. Downloaded
+test datasets belong under `testing_data/`. Generated images and downloaded PDFs
+are ignored by Git.

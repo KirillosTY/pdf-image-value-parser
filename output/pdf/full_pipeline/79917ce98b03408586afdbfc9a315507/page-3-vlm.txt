@@ -1,0 +1,8 @@
+The image is a pie chart showing the market share percentages for different products in 2025. The categories are labeled as follows:
+
+- **Product A**: 40%
+- **Product B**: 30%
+- **Product C**: 20%
+- **Other**: 10%
+
+Each slice of the pie is color-coded, with Product A in blue, Product B in orange, and Product C in green. The "Other" category is represented by a gray slice. The percentages are clearly labeled on each corresponding section of the pie chart.

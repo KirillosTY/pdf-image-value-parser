@@ -1,0 +1,52 @@
+{
+  "data": {
+    "measurements": [
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Monthly revenue by region",
+        "series": "North",
+        "category": "Jan",
+        "row_label": null,
+        "x": null,
+        "y": null,
+        "value": 120,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "printed",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Monthly revenue by region",
+        "series": "South",
+        "category": "Jan",
+        "row_label": null,
+        "x": null,
+        "y": null,
+        "value": 95,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "printed",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Monthly revenue by region",
+        "series": "North",
+        "category": "Feb",
+        "row_label": null,
+        "x": null,
+        "y": null,
+        "value": 150,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "printed",
+        "notes": null
+      }
+    ]
+  },
+  "unmapped_observations": []
+}

@@ -1,0 +1,262 @@
+{
+  "name": "test-pdf-measurements-v1",
+  "mapping": "records-v1",
+  "formatter_schemas": {
+    "MEASUREMENTS": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "measurements"
+      ],
+      "properties": {
+        "measurements": {
+          "type": "array",
+          "description": "One record per visible value, scatter point, or box statistic, across every panel. Exclude axis ticks and legend keys as measurements. Preserve missing values as null; do not invent hidden sample data.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "panel",
+              "chart_type",
+              "title",
+              "series",
+              "category",
+              "row_label",
+              "x",
+              "y",
+              "value",
+              "statistic",
+              "unit",
+              "reading",
+              "notes"
+            ],
+            "properties": {
+              "panel": {
+                "type": "string",
+                "description": "Panel identifier from the observations, or positional identifier 1, 2, etc. Keep separate panels distinct."
+              },
+              "chart_type": {
+                "type": "string",
+                "enum": [
+                  "bar_chart",
+                  "line_chart",
+                  "pie_chart",
+                  "scatter_plot",
+                  "box_plot",
+                  "heatmap",
+                  "table",
+                  "unknown"
+                ],
+                "description": "Type described by the VLM, not necessarily the Docling classification."
+              },
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "series": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Legend series or box-plot group; null if absent."
+              },
+              "category": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Bar/line category, pie slice label, or heatmap column label."
+              },
+              "row_label": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Heatmap row label, or table row label."
+              },
+              "x": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Numeric scatter x coordinate, otherwise null."
+              },
+              "y": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Numeric scatter y coordinate, otherwise null."
+              },
+              "value": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Bar height, line value, slice value, heatmap cell, or box statistic. Null when missing; never reconstruct from expectations."
+              },
+              "statistic": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "minimum",
+                  "q1",
+                  "median",
+                  "q3",
+                  "maximum",
+                  "lower_whisker",
+                  "upper_whisker",
+                  "outlier",
+                  null
+                ],
+                "description": "Box statistic only. Whiskers are not assumed to be sample minima/maxima."
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Literal unit, including percent or thousand USD; do not rescale values."
+              },
+              "reading": {
+                "type": "string",
+                "enum": [
+                  "printed",
+                  "estimated",
+                  "unknown"
+                ],
+                "description": "Printed only for an explicit numeric annotation. Estimated when read from geometry; unknown if absent or unclear."
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Uncertainty, coordinate units, or qualifications from the observations."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sql_tables": {
+    "measurements": {
+      "schema_keys": [
+        "MEASUREMENTS"
+      ],
+      "records_path": [
+        "measurements"
+      ],
+      "columns": {
+        "panel": {
+          "type": "text",
+          "source": [
+            "panel"
+          ],
+          "nullable": false,
+          "description": "Panel identifier from the observations, or positional identifier 1, 2, etc. Keep separate panels distinct."
+        },
+        "chart_type": {
+          "type": "text",
+          "source": [
+            "chart_type"
+          ],
+          "nullable": false,
+          "description": "Type described by the VLM, not necessarily the Docling classification."
+        },
+        "title": {
+          "type": "text",
+          "source": [
+            "title"
+          ],
+          "nullable": true
+        },
+        "series": {
+          "type": "text",
+          "source": [
+            "series"
+          ],
+          "nullable": true,
+          "description": "Legend series or box-plot group; null if absent."
+        },
+        "category": {
+          "type": "text",
+          "source": [
+            "category"
+          ],
+          "nullable": true,
+          "description": "Bar/line category, pie slice label, or heatmap column label."
+        },
+        "row_label": {
+          "type": "text",
+          "source": [
+            "row_label"
+          ],
+          "nullable": true,
+          "description": "Heatmap row label, or table row label."
+        },
+        "x": {
+          "type": "numeric",
+          "source": [
+            "x"
+          ],
+          "nullable": true,
+          "description": "Numeric scatter x coordinate, otherwise null."
+        },
+        "y": {
+          "type": "numeric",
+          "source": [
+            "y"
+          ],
+          "nullable": true,
+          "description": "Numeric scatter y coordinate, otherwise null."
+        },
+        "value": {
+          "type": "numeric",
+          "source": [
+            "value"
+          ],
+          "nullable": true,
+          "description": "Bar height, line value, slice value, heatmap cell, or box statistic. Null when missing; never reconstruct from expectations."
+        },
+        "statistic": {
+          "type": "text",
+          "source": [
+            "statistic"
+          ],
+          "nullable": true,
+          "description": "Box statistic only. Whiskers are not assumed to be sample minima/maxima."
+        },
+        "unit": {
+          "type": "text",
+          "source": [
+            "unit"
+          ],
+          "nullable": true,
+          "description": "Literal unit, including percent or thousand USD; do not rescale values."
+        },
+        "reading": {
+          "type": "text",
+          "source": [
+            "reading"
+          ],
+          "nullable": false,
+          "description": "Printed only for an explicit numeric annotation. Estimated when read from geometry; unknown if absent or unclear."
+        },
+        "notes": {
+          "type": "text",
+          "source": [
+            "notes"
+          ],
+          "nullable": true,
+          "description": "Uncertainty, coordinate units, or qualifications from the observations."
+        }
+      }
+    }
+  }
+}

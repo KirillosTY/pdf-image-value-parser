@@ -1,0 +1,21 @@
+The image is a scatter plot titled "Scatter plot - two labeled cohorts." It displays data for two groups: Treatment (blue circles) and Control (red triangles). The x-axis represents dose in milligrams (mg), while the y-axis shows response in units.
+
+Here are the visible points:
+
+- **Treatment group**:
+  - Dose = 1 mg, Response ≈ 2.0
+  - Dose = 2 mg, Response ≈ 2.8
+  - Dose = 3 mg, Response ≈ 3.6
+  - Dose = 4 mg, Response ≈ 4.2
+  - Dose = 5 mg, Response ≈ 5.1
+  - Dose = 6 mg, Response ≈ 5.8
+
+- **Control group**:
+  - Dose = 1 mg, Response ≈ 5.9
+  - Dose = 2 mg, Response ≈ 5.3
+  - Dose = 3 mg, Response ≈ 4.8
+  - Dose = 4 mg, Response ≈ 4.0
+  - Dose = 5 mg, Response ≈ 3.3
+  - Dose = 6 mg, Response ≈ 2.7
+
+The plot does not include any error bars or footnotes. The y-axis is labeled "Response (units)" and ranges from approximately 0 to 7 units.

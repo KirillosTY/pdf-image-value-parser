@@ -5,44 +5,85 @@ from agent import graph
 pytestmark = pytest.mark.anyio
 
 
-@pytest.mark.langsmith
-async def test_agent_reports_unwired_redis_hook() -> None:
+async def test_agent_requires_an_approved_run() -> None:
     inputs = {"input_path": "/example/pdfs"}
-    with pytest.raises(NotImplementedError, match="ensure_redis"):
+    with pytest.raises(ValueError, match="run_id"):
         await graph.ainvoke(inputs)
 
 
 async def test_coordinator_resumes_failed_action_without_reextracting(monkeypatch):
+    import importlib
+
     from langgraph.checkpoint.memory import InMemorySaver
 
     from agent import hooks
+
+    graph_module = importlib.import_module("agent.graph")
     from agent.graph import build_graph
     from agent.state import WorkerEvent
 
-    notifications = iter([
-        ("docling.pdf_queued", {"document_attempt_id": "pdf", "image_keys": ["image"]}),
-        ("docling.completed", {}),
-        ("vlm.pdf_claimed", {"document_attempt_id": "pdf"}),
-        ("vlm.image_completed", {"payload_ref": "raw"}),
-        ("analysis.completed", {"payload_ref": "normalized", "chart_type": "LINE_CHART",
-                                "unmapped_observations_ref": "unmapped"}),
-        ("db_fields.completed", {"payload_ref": "fields"}),
-        ("writer.committed", {"record_id": "record"}),
-    ])
+    notifications = iter(
+        [
+            (
+                "docling.pdf_queued",
+                {"document_attempt_id": "pdf", "image_keys": ["image"]},
+            ),
+            ("docling.completed", {}),
+            ("vlm.pdf_claimed", {"document_attempt_id": "pdf"}),
+            ("vlm.image_completed", {"payload_ref": "raw"}),
+            (
+                "analysis.completed",
+                {
+                    "payload_ref": "normalized",
+                    "chart_type": "LINE_CHART",
+                    "unmapped_observations_ref": "unmapped",
+                },
+            ),
+            ("db_fields.completed", {"payload_ref": "fields"}),
+            ("writer.committed", {"record_id": "record"}),
+        ]
+    )
     calls = []
     attempts = 0
 
+    async def prepare(state):
+        return {"run_id": "resume-run"}
+
+    async def unchanged(state):
+        return {}
+
+    monkeypatch.setattr(graph_module, "prepare_agent", prepare)
+    for name in (
+        "match_vlm_models",
+        "match_formatter_models",
+        "create_vlm_queues",
+        "create_formatter_queues",
+    ):
+        monkeypatch.setattr(graph_module, name, unchanged)
+
     async def receive(state):
         kind, payload = next(notifications)
-        if kind in {"vlm.image_completed", "analysis.completed", "db_fields.completed", "writer.committed"}:
+        if kind in {
+            "vlm.image_completed",
+            "analysis.completed",
+            "db_fields.completed",
+            "writer.committed",
+        }:
             payload.update(document_attempt_id="pdf", image_key="image")
-        return WorkerEvent(event_id=kind, run_id=state.run_id, kind=kind,
-                           source=kind.split(".")[0], timestamp="now", **payload)
+        return WorkerEvent(
+            event_id=kind,
+            run_id=state.run_id,
+            kind=kind,
+            source=kind.split(".")[0],
+            timestamp="now",
+            **payload,
+        )
 
     def adapter(name):
         async def invoke(state, event=None):
             calls.append(name)
             return {}
+
         return invoke
 
     async def write(state, event):
@@ -54,16 +95,26 @@ async def test_coordinator_resumes_failed_action_without_reextracting(monkeypatc
         calls.append("write_chart_record")
         return {}
 
-    for name in ("ensure_redis", "start_docling", "start_vlm_pool", "start_formatter_pool",
-                 "analyze_vlm_result", "build_db_fields", "acknowledge_pdf",
-                 "acknowledge_worker_event", "finish_run"):
+    for name in (
+        "ensure_redis",
+        "start_docling",
+        "start_vlm_pool",
+        "start_formatter_pool",
+        "analyze_vlm_result",
+        "build_db_fields",
+        "acknowledge_pdf",
+        "acknowledge_worker_event",
+        "finish_run",
+    ):
         monkeypatch.setattr(hooks, name, adapter(name))
     monkeypatch.setattr(hooks, "wait_for_worker_event", receive)
     monkeypatch.setattr(hooks, "write_chart_record", write)
     compiled = build_graph(checkpointer=InMemorySaver())
     config = {"configurable": {"thread_id": "resume-test"}, "recursion_limit": 100}
     with pytest.raises(RuntimeError, match="temporarily unavailable"):
-        await compiled.ainvoke({"input_path": "/pdfs", "vlm": {"vlm_instances": 2}}, config)
+        await compiled.ainvoke(
+            {"input_path": "/pdfs", "vlm": {"vlm_instances": 2}}, config
+        )
     snapshot = await compiled.aget_state(config)
     assert snapshot.values["pending_actions"] == ["write_chart_record"]
     result = await compiled.ainvoke(None, config)

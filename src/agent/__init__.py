@@ -1,4 +1,4 @@
-"""Expose the main pipeline agent's compiled orchestration skeleton."""
+"""Expose the main pipeline agent's compiled worker orchestration graph."""
 
 from agent.graph import graph
 

@@ -1,0 +1,55 @@
+{
+  "extracted_50542627ef06c434_measurements": [
+    {
+      "image_key": "example-image-key",
+      "ordinal": 0,
+      "panel": "1",
+      "chart_type": "bar_chart",
+      "title": "Monthly revenue by region",
+      "series": "North",
+      "category": "Jan",
+      "row_label": null,
+      "x": null,
+      "y": null,
+      "value": 120,
+      "statistic": null,
+      "unit": "thousand USD",
+      "reading": "printed",
+      "notes": null
+    },
+    {
+      "image_key": "example-image-key",
+      "ordinal": 1,
+      "panel": "1",
+      "chart_type": "bar_chart",
+      "title": "Monthly revenue by region",
+      "series": "South",
+      "category": "Jan",
+      "row_label": null,
+      "x": null,
+      "y": null,
+      "value": 95,
+      "statistic": null,
+      "unit": "thousand USD",
+      "reading": "printed",
+      "notes": null
+    },
+    {
+      "image_key": "example-image-key",
+      "ordinal": 2,
+      "panel": "1",
+      "chart_type": "bar_chart",
+      "title": "Monthly revenue by region",
+      "series": "North",
+      "category": "Feb",
+      "row_label": null,
+      "x": null,
+      "y": null,
+      "value": 150,
+      "statistic": null,
+      "unit": "thousand USD",
+      "reading": "printed",
+      "notes": null
+    }
+  ]
+}

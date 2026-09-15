@@ -1,0 +1,441 @@
+{
+  "schema_version": 2,
+  "document_id": "3a3bb6c866f84ef21166396795f085d6138cc1692da1ff71446afb149452543d",
+  "pdf_sha256": "ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e",
+  "source_path": "/home/kirilllos/projects/AI/parser/parser/output/pdf/chart_extraction_test_fixture.pdf",
+  "name": "chart_extraction_test_fixture",
+  "started_at": "2026-09-14T09:53",
+  "status": "completed",
+  "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+  "assets": [
+    {
+      "asset_id": "b2fba56b0c484a0327a210a31a58afdd9b8f520603a901aaa6f919c67ef133f5",
+      "name": "figure",
+      "images_meta": [
+        {
+          "redis_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47:image:b2fba56b0c484a0327a210a31a58afdd9b8f520603a901aaa6f919c67ef133f5:1",
+          "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+          "page_number": 2,
+          "width": 2320,
+          "height": 1387,
+          "class_name": "bar_chart",
+          "confidence": 0.9988307356834412,
+          "classifications": [
+            {
+              "confidence": 0.9988307356834412,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "bar_chart"
+            },
+            {
+              "confidence": 0.0009343827841803432,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "table"
+            },
+            {
+              "confidence": 0.00011737715976778418,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "screenshot_from_computer"
+            }
+          ],
+          "vlm_status": "not_started",
+          "vlm_result": null,
+          "format_status": "not_started",
+          "formatting": null,
+          "vlm_retry_count": 0,
+          "format_retry_count": 0,
+          "failed": false
+        }
+      ],
+      "context": {
+        "caption": "",
+        "mentions": [],
+        "nearby": [
+          {
+            "text": "Grouped bar chart - values are in thousand USD"
+          }
+        ],
+        "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+        "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+      },
+      "status": "completed",
+      "error": null
+    },
+    {
+      "asset_id": "afe6a58cd2c139fe6810193544d08d9f27bce7d21541c67dc5cbfb4081f967db",
+      "name": "figure",
+      "images_meta": [
+        {
+          "redis_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47:image:afe6a58cd2c139fe6810193544d08d9f27bce7d21541c67dc5cbfb4081f967db:1",
+          "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+          "page_number": 3,
+          "width": 2321,
+          "height": 1377,
+          "class_name": "line_chart",
+          "confidence": 0.9989795088768005,
+          "classifications": [
+            {
+              "confidence": 0.9989795088768005,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "line_chart"
+            },
+            {
+              "confidence": 0.0008583695162087679,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "scatter_plot"
+            },
+            {
+              "confidence": 0.0001461356587242335,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "bar_chart"
+            }
+          ],
+          "vlm_status": "not_started",
+          "vlm_result": null,
+          "format_status": "not_started",
+          "formatting": null,
+          "vlm_retry_count": 0,
+          "format_retry_count": 0,
+          "failed": false
+        }
+      ],
+      "context": {
+        "caption": "",
+        "mentions": [],
+        "nearby": [
+          {
+            "text": "Line chart - observed values and planned target Year Response (units)"
+          }
+        ],
+        "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+        "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+      },
+      "status": "completed",
+      "error": null
+    },
+    {
+      "asset_id": "d152ce69809dad46c4a4c424b27d5cd1261bc380e91a2376c4d53dd64bbfb67d",
+      "name": "figure",
+      "images_meta": [
+        {
+          "redis_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47:image:d152ce69809dad46c4a4c424b27d5cd1261bc380e91a2376c4d53dd64bbfb67d:1",
+          "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+          "page_number": 4,
+          "width": 1473,
+          "height": 1183,
+          "class_name": "pie_chart",
+          "confidence": 0.999870777130127,
+          "classifications": [
+            {
+              "confidence": 0.999870777130127,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "pie_chart"
+            },
+            {
+              "confidence": 5.848407090525143e-05,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "bar_chart"
+            },
+            {
+              "confidence": 2.653041883604601e-05,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "table"
+            }
+          ],
+          "vlm_status": "not_started",
+          "vlm_result": null,
+          "format_status": "not_started",
+          "formatting": null,
+          "vlm_retry_count": 0,
+          "format_retry_count": 0,
+          "failed": false
+        }
+      ],
+      "context": {
+        "caption": "Pie chart - percentages sum to 100% 2025 market share",
+        "mentions": [],
+        "nearby": [],
+        "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+        "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+      },
+      "status": "completed",
+      "error": null
+    },
+    {
+      "asset_id": "a468c3cc43281cc74b32d31a5a2c933bdf3afc94648938396b780aa509c27e8a",
+      "name": "figure",
+      "images_meta": [
+        {
+          "redis_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47:image:a468c3cc43281cc74b32d31a5a2c933bdf3afc94648938396b780aa509c27e8a:1",
+          "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+          "page_number": 5,
+          "width": 2309,
+          "height": 1411,
+          "class_name": "scatter_plot",
+          "confidence": 0.9274588227272034,
+          "classifications": [
+            {
+              "confidence": 0.9274588227272034,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "scatter_plot"
+            },
+            {
+              "confidence": 0.06058048456907272,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "line_chart"
+            },
+            {
+              "confidence": 0.007509300019592047,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "box_plot"
+            }
+          ],
+          "vlm_status": "not_started",
+          "vlm_result": null,
+          "format_status": "not_started",
+          "formatting": null,
+          "vlm_retry_count": 0,
+          "format_retry_count": 0,
+          "failed": false
+        }
+      ],
+      "context": {
+        "caption": "",
+        "mentions": [],
+        "nearby": [
+          {
+            "text": "Line chart - observed values and planned target Year Response (units)"
+          }
+        ],
+        "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+        "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+      },
+      "status": "completed",
+      "error": null
+    },
+    {
+      "asset_id": "f4ab8d7eb1ca642cbffd27695fea0348870634e9fb83631d960752dac66c1c7d",
+      "name": "figure",
+      "images_meta": [
+        {
+          "redis_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47:image:f4ab8d7eb1ca642cbffd27695fea0348870634e9fb83631d960752dac66c1c7d:1",
+          "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+          "page_number": 6,
+          "width": 2312,
+          "height": 1410,
+          "class_name": "box_plot",
+          "confidence": 0.9993925094604492,
+          "classifications": [
+            {
+              "confidence": 0.9993925094604492,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "box_plot"
+            },
+            {
+              "confidence": 0.0005919309332966805,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "bar_chart"
+            },
+            {
+              "confidence": 7.616681614308618e-06,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "scatter_plot"
+            }
+          ],
+          "vlm_status": "not_started",
+          "vlm_result": null,
+          "format_status": "not_started",
+          "formatting": null,
+          "vlm_retry_count": 0,
+          "format_retry_count": 0,
+          "failed": false
+        }
+      ],
+      "context": {
+        "caption": "",
+        "mentions": [],
+        "nearby": [],
+        "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+        "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+      },
+      "status": "completed",
+      "error": null
+    },
+    {
+      "asset_id": "20da836f5ea0367e3b51d84e6a33e90dba0ec2f34b54b6bf7e0b9afb035476a8",
+      "name": "figure",
+      "images_meta": [
+        {
+          "redis_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47:image:20da836f5ea0367e3b51d84e6a33e90dba0ec2f34b54b6bf7e0b9afb035476a8:1",
+          "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+          "page_number": 7,
+          "width": 2178,
+          "height": 1488,
+          "class_name": "scatter_plot",
+          "confidence": 0.3844270706176758,
+          "classifications": [
+            {
+              "confidence": 0.3844270706176758,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "scatter_plot"
+            },
+            {
+              "confidence": 0.2119089812040329,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "line_chart"
+            },
+            {
+              "confidence": 0.13447029888629913,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "engineering_drawing"
+            }
+          ],
+          "vlm_status": "not_started",
+          "vlm_result": null,
+          "format_status": "not_started",
+          "formatting": null,
+          "vlm_retry_count": 0,
+          "format_retry_count": 0,
+          "failed": false
+        }
+      ],
+      "context": {
+        "caption": "",
+        "mentions": [],
+        "nearby": [],
+        "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+        "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+      },
+      "status": "completed",
+      "error": null
+    },
+    {
+      "asset_id": "298cabc1599b47a6a38f2aed5627c75faf7d420c98d9ab81fa3854a61428f8d4",
+      "name": "figure",
+      "images_meta": [
+        {
+          "redis_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47:image:298cabc1599b47a6a38f2aed5627c75faf7d420c98d9ab81fa3854a61428f8d4:1",
+          "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+          "page_number": 8,
+          "width": 2315,
+          "height": 1319,
+          "class_name": "line_chart",
+          "confidence": 0.881877064704895,
+          "classifications": [
+            {
+              "confidence": 0.881877064704895,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "line_chart"
+            },
+            {
+              "confidence": 0.11459182947874069,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "bar_chart"
+            },
+            {
+              "confidence": 0.002257708227261901,
+              "created_by": "DocumentPictureClassifier",
+              "class_name": "table"
+            }
+          ],
+          "vlm_status": "not_started",
+          "vlm_result": null,
+          "format_status": "not_started",
+          "formatting": null,
+          "vlm_retry_count": 0,
+          "format_retry_count": 0,
+          "failed": false
+        }
+      ],
+      "context": {
+        "caption": "",
+        "mentions": [],
+        "nearby": [
+          {
+            "text": "Week"
+          }
+        ],
+        "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+        "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+      },
+      "status": "completed",
+      "error": null
+    },
+    {
+      "asset_id": "170ec96257203c6038d5fe1288b9407aa684fd57733cca5cc99410710a414f4a",
+      "name": "table",
+      "images_meta": [
+        {
+          "redis_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47:image:170ec96257203c6038d5fe1288b9407aa684fd57733cca5cc99410710a414f4a:1",
+          "manifest_key": "manifest:ebe970507e9a4c6436906a9a317777bb6be13d60edbbfccffe96d549b1d89b2e:bbe8ea5f4f19438280429dfa22e7ac47",
+          "page_number": 9,
+          "width": 2265,
+          "height": 1171,
+          "class_name": "table",
+          "confidence": 1.0,
+          "classifications": [
+            {
+              "class_name": "table",
+              "confidence": 1.0
+            }
+          ],
+          "vlm_status": "not_started",
+          "vlm_result": null,
+          "format_status": "not_started",
+          "formatting": null,
+          "vlm_retry_count": 0,
+          "format_retry_count": 0,
+          "failed": false
+        }
+      ],
+      "context": {
+        "caption": "",
+        "mentions": [],
+        "nearby": [
+          {
+            "text": "Use this page to compare normalized formatter output with the printed chart values."
+          },
+          {
+            "text": "BAR_CHART Jan North=120, South=95; Feb North=150, South=125; Mar North=135, South=145; Apr North=180, South=155; May North=210,"
+          },
+          {
+            "text": "South=190."
+          }
+        ],
+        "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+        "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+      },
+      "status": "completed",
+      "error": null
+    }
+  ],
+  "below_threshold": [],
+  "discarded": [],
+  "errors": [],
+  "docling_version": "2.126.0",
+  "conversion_status": "success",
+  "document_metadata": {
+    "title": "Chart extraction test fixture",
+    "authors": [
+      "Figure parser test data"
+    ],
+    "publication_year": null,
+    "journal": null,
+    "doi": null,
+    "arxiv_id": null,
+    "abstract": null,
+    "evidence": {
+      "title": "pdf.info.Title",
+      "authors": "pdf.info.Author (may be an unsplit list)"
+    },
+    "warnings": [],
+    "organization": null,
+    "publication_date": null
+  },
+  "page_count": 9,
+  "finished_at": "2026-09-14T09:54:05.082267+00:00",
+  "format_status": "not_started",
+  "db_status": "not_started",
+  "run_id": "synthetic-fixture-evaluation",
+  "schema_id": null,
+  "approve_with_fails": false
+}

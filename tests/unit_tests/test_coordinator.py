@@ -24,20 +24,20 @@ def queued(state, index=0):
                              document_attempt_id=f"pdf-{index}", image_keys=[f"image-{index}"]))
 
 
-def test_five_pdf_start_and_duplicate_readiness():
+def test_twenty_pdf_start_and_duplicate_readiness():
     state = running()
-    for index in range(4):
+    for index in range(19):
         state = queued(state, index)
     with pytest.raises(ValueError, match="threshold"):
         apply(state, event("docling.filled"))
-    state = queued(state, 4)
+    state = queued(state, 19)
     state = apply(state, event("docling.filled"))
     assert state.pending_actions == ["start_vlm_pool"]
     assert state.docling.status == "filled"
     state.pending_actions = []  # Successful dispatch.
     state = apply(state, event("docling.filled"))
     assert state.pending_actions == []
-    assert state.docling.queued_pdfs == 5
+    assert state.docling.queued_pdfs == 20
 
 
 def test_small_batch_drains_through_storage_and_preserves_references():

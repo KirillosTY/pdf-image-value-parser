@@ -6,10 +6,9 @@ from io import BytesIO
 from uuid import uuid4
 
 from parser.src.docling.type_format import Manifest
+from parser.src.redis.connection import redis_client
 
-import redis
-
-red = redis.Redis(host="localhost", port=6379, decode_responses=False)
+red = redis_client()
 
 STREAM = "pdf:ready"
 FORMAT_READY = "images:format_ready"
@@ -20,12 +19,12 @@ def create_manifest_key(document_id: str) -> str:
     return f"manifest:{document_id}:{uuid4().hex}"
 
 
-def store_image(image, manifest_key: str, asset_id: str, ordinal: int) -> str:
+def store_image(image, manifest_key: str, asset_id: str, ordinal: int, *, client=None) -> str:
     """Store a PNG and its parent manifest key together in a Redis hash."""
     key = f"{manifest_key}:image:{asset_id}:{ordinal}"
     with BytesIO() as buffer:
         image.save(buffer, format="PNG")
-        red.hset(
+        (client if client is not None else red).hset(
             key,
             mapping={
                 "manifest_key": manifest_key,
@@ -65,15 +64,28 @@ def find_manifest_image(manifest: dict, image_key: str) -> dict:
     raise KeyError(f"Image is not in this manifest: {image_key}")
 
 
+def image_failed(image: dict) -> bool:
+    """Identify a terminal failure, distinct from an attempt awaiting retry."""
+    return (
+        image.get("failed") is True
+        and "failed" in {image.get("vlm_status"), image.get("format_status")}
+        and "processing" not in {image.get("vlm_status"), image.get("format_status")}
+    )
+
+
 def document_ready(manifest: dict) -> bool:
-    """Require a successful PDF and successful VLM/formatting for every image."""
+    """Require all images to succeed or be explicitly omitted after terminal failure."""
     images = manifest_images(manifest)
     return (
         manifest.get("status") == "completed"
         and bool(images)
         and all(
-            image.get("vlm_status") == "complete"
-            and image.get("format_status") == "complete"
+            (
+                not image.get("failed")
+                and image.get("vlm_status") == "complete"
+                and image.get("format_status") == "complete"
+            )
+            or (manifest.get("approve_with_fails") == "omit" and image_failed(image))
             for image in images
         )
     )
@@ -148,6 +160,19 @@ def update_manifest_image(client, manifest_key: str, image_key: str, update) -> 
     return find_manifest_image(manifest, image_key)
 
 
+def mark_image_failed(client, manifest_key: str, image_key: str) -> dict:
+    """Finalize a failed image after the caller has exhausted its retry policy."""
+
+    def finish(image):
+        if "failed" not in {image.get("vlm_status"), image.get("format_status")}:
+            raise ValueError("Only a failed processing attempt can be finalized")
+        if "processing" in {image.get("vlm_status"), image.get("format_status")}:
+            raise ValueError("An image is still processing")
+        image["failed"] = True
+
+    return update_manifest_image(client, manifest_key, image_key, finish)
+
+
 def save_vlm_result(
     client,
     manifest_key: str,
@@ -172,6 +197,10 @@ def save_vlm_result(
                 pipe.watch(manifest_key, FORMAT_READY)
                 manifest = load_manifest(pipe, manifest_key)
                 image = find_manifest_image(manifest, image_key)
+                if image.get("failed"):
+                    raise ValueError(
+                        "Image has a terminal failure; create a new attempt"
+                    )
                 saved = image.get("vlm_result") or {}
                 if image.get("vlm_status") == "complete":
                     if saved.get("raw_output") != raw_output:

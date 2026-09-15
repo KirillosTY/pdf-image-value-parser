@@ -1,0 +1,58 @@
+{
+  "name": "business-values-v1",
+  "mapping": "records-v1",
+  "formatter_schemas": {
+    "BUSINESS": {
+      "type": "object",
+      "required": [
+        "values"
+      ],
+      "properties": {
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "amount"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sql_tables": {
+    "business_values": {
+      "schema_keys": [
+        "BUSINESS"
+      ],
+      "records_path": [
+        "values"
+      ],
+      "columns": {
+        "label": {
+          "type": "text",
+          "source": [
+            "label"
+          ],
+          "nullable": false
+        },
+        "amount": {
+          "type": "numeric",
+          "source": [
+            "amount"
+          ],
+          "nullable": false
+        }
+      }
+    }
+  }
+}

@@ -1,131 +1,116 @@
-"""Name future worker adapters without implementing their tools yet.
-
-Start/schedule hooks should return promptly with serializable state updates.
-Workers publish events; only the coordinator applies updates to shared state.
-No Redis process, model call, or database write happens on import.
-"""
+"""Connect checkpointed graph actions to the run's background workers."""
 
 from typing import Any
 
-from agent.state import State, WorkerEvent
+from parser.src.redis.connection import async_redis_client
+
+from agent.state import RedisState, State, WorkerEvent
 
 StateUpdate = dict[str, Any]
 
 
+async def runtime_for(state):
+    """Import the runtime lazily so graph inspection does not start services."""
+    from agent.runtime import get_runtime
+
+    return await get_runtime(state)
+
+
 async def ensure_redis(state: State) -> StateUpdate:
-    """Connect to Redis, or start a managed server, and verify readiness."""
-    # TODO: Initialize queues using the coordinator-assigned run_id/config.
-    # Record connection_ref and process ownership; do not save a client in state.
-    raise NotImplementedError("ensure_redis: Redis lifecycle adapter is not wired")
+    """Verify the configured shared Redis server is reachable."""
+    async with async_redis_client() as client:
+        await client.ping()
+    return {
+        "redis": RedisState(
+            status="ready", connection_ref="REDIS_URL", managed_by_run=False
+        )
+    }
 
 
 async def start_docling(state: State) -> StateUpdate:
-    """Launch the background PDF producer after Redis is ready."""
-    # TODO: Adapt DocumentWorker to publish run-scoped events after enqueueing.
-    # Emit filled at five waiting PDFs; emit completed after the final enqueue.
-    # Return immediately, leaving Docling running while the main agent listens.
-    raise NotImplementedError("start_docling: background producer is not wired")
+    """Launch or recover the producer and worker supervisors."""
+    runtime = await runtime_for(state)
+    return {"resource_plan": runtime.state.resource_plan}
 
 
 async def wait_for_worker_event(state: State) -> WorkerEvent:
-    """Wait for a recoverable event from this run's workers."""
-    # TODO: Use a blocking/event-driven wait, with cancellation and worker health
-    # checks. Persist event IDs for deduplication and recovery across restarts.
-    raise NotImplementedError("wait_for_worker_event: event transport is not wired")
+    """Wait for the oldest unacknowledged event without blocking the event loop."""
+    return await (await runtime_for(state)).next_event()
 
 
 async def apply_worker_event(state: State, event: WorkerEvent) -> StateUpdate:
-    """Apply the coordinator's validated state transition without side effects."""
+    """Apply a validated event without performing worker side effects."""
     from agent.coordinator import apply_event
 
     return apply_event(state, event)
 
 
 async def acknowledge_worker_event(state: State, event: WorkerEvent) -> None:
-    """Acknowledge a notification after checkpointing its required actions."""
-    # TODO: Acknowledge this run's event delivery idempotently. Event IDs must be
-    # stable across redelivery. Do not confuse notifications with PDF job claims.
-    raise NotImplementedError("acknowledge_worker_event: event transport is not wired")
+    """Release a delivery after the graph has applied its actions."""
+    await (await runtime_for(state)).acknowledge_event(event)
 
 
 async def acknowledge_pdf(state: State, event: WorkerEvent) -> StateUpdate:
-    """Release a PDF claim after every image has a durable terminal outcome."""
-    # TODO: Use event.document_attempt_id to acknowledge the claimed Redis job.
-    # On item failure, persist the terminal error and raw output before returning.
-    raise NotImplementedError("acknowledge_pdf: PDF acknowledgment is not wired")
+    """Record a terminal PDF claim while preserving its manifest and errors."""
+    await (await runtime_for(state)).acknowledge_pdf(event)
+    return {}
 
 
 async def start_vlm_pool(state: State) -> StateUpdate:
-    """Start the configured VLM instances with a request limit per instance."""
-    # TODO: Start only when filled or producer completed with waiting PDFs.
-    # Provision vlm_instances independently running models and record their
-    # endpoints. Limit each to requests_per_instance concurrent requests.
-    # Check available capacity before provisioning; report startup failures.
-    # Repeated signals reuse the pool. Instances claim distinct Redis jobs.
-    # Persist raw output (it need not be JSON or match a schema), then emit
-    # vlm.image_completed with its reference. Never discard the original output.
-    raise NotImplementedError("start_vlm_pool: VLM consumers are not wired")
+    """Release the startup gate; reuse the run's existing model supervisor."""
+    await (await runtime_for(state)).enable_models()
+    return {}
 
 
 async def start_formatter_pool(state: State) -> StateUpdate:
-    """Start workers using the configured formatting language-model endpoint."""
-    # TODO: Ensure the model endpoint is ready and launch at most max_workers.
-    # These workers may share one loaded text model; they do not call the VLM.
-    # Consume a bounded result queue independently of the coordinator. When
-    # full, apply backpressure upstream without dropping results or events.
-    raise NotImplementedError("start_formatter_pool: model workers are not wired")
+    """Reuse the shared resource scheduler for the formatter model queues."""
+    await runtime_for(state)
+    return {}
 
 
 async def analyze_vlm_result(state: State, event: WorkerEvent) -> StateUpdate:
-    """Enqueue raw VLM output for model-backed chart analysis and normalization."""
-    # TODO: Return promptly. A formatter worker loads event.payload_ref and uses
-    # the text model to resolve chart type and normalize output to its schema.
-    # Validate the model's proposed output with code before analysis.completed.
-    # A model response alone is not proof of schema compliance or factual accuracy.
-    # Preserve raw/normalized references; never invent missing chart values.
-    # Account for every extracted observation as mapped or unmapped. Preserve
-    # unmapped_observations with source references and reasons; schema-valid
-    # output alone does not show that all observations were retained.
-    # On validation failure, use bounded repair attempts with validation errors,
-    # then emit worker.item_failed if still invalid or unresolved.
-    raise NotImplementedError("analyze_vlm_result: chart analysis is not wired")
+    """Route the saved extraction to its selected formatter."""
+    await (await runtime_for(state)).queue_format(event)
+    return {}
 
 
 async def build_db_fields(state: State, event: WorkerEvent) -> StateUpdate:
-    """Schedule chart-specific mapping into a permanent record's fields."""
-    # TODO: In the formatter worker, map validated values and provenance into an
-    # existing storage schema. Validate required fields/types before emitting
-    # db_fields.completed. Keep database writes in the separate writer stage.
-    # Carry raw extraction and unmapped_observations references through mapping.
-    raise NotImplementedError("build_db_fields: field mapper is not wired")
+    """Validate relational mapping before publishing the mapping event."""
+    await (await runtime_for(state)).map_fields(event)
+    return {}
 
 
 async def write_chart_record(state: State, event: WorkerEvent) -> StateUpdate:
-    """Schedule an idempotent permanent write of the mapped record."""
-    # TODO: Commit using the document-attempt/asset/image identity, then emit
-    # writer.committed with the permanent record ID. Retain failed work to retry.
-    # Permanently preserve raw output and unmapped observations with the record;
-    # Redis references alone are not permanent storage of their contents.
-    raise NotImplementedError("write_chart_record: database writer is not wired")
+    """Make the mapped image available to the whole-document batch writer."""
+    await (await runtime_for(state)).queue_write(event)
+    return {}
 
 
 async def handle_worker_failure(state: State, event: WorkerEvent) -> StateUpdate:
-    """Record an item or stage failure and apply the future retry policy."""
-    # TODO: Retry eligible items or record durable terminal errors. A stage-level
-    # failure must not be treated as successful pipeline completion.
-    raise NotImplementedError("handle_worker_failure: failure policy is not wired")
+    """Keep terminal errors in Redis; workers have already exhausted retries."""
+    await (await runtime_for(state)).acknowledge_pdf(event)
+    return {}
 
 
 def pipeline_is_finished(state: State) -> bool:
-    """Check producer completion, drained queues, and durable item outcomes."""
+    """Require producer completion and terminal image outcomes."""
     from agent.coordinator import pipeline_is_finished as is_finished
 
     return is_finished(state)
 
 
 async def finish_run(state: State) -> StateUpdate:
-    """Finalize the run and release only resources owned by it."""
-    # TODO: Record completed/completed_with_errors/failed and completion time.
-    # Stop owned workers; preserve queued work needed for recovery. Never stop
-    # a shared Redis server or discard intermediate data needed by another run.
-    raise NotImplementedError("finish_run: finalization is not wired")
+    """Drain omitted failures, persist the outcome, and release owned resources."""
+    runtime = await runtime_for(state)
+    try:
+        if state.status != "failed":
+            await runtime.finish_writes()
+        outcome = (
+            "failed"
+            if state.status == "failed"
+            else ("completed_with_errors" if state.errors else "completed")
+        )
+        await runtime.record_outcome(outcome, state.errors)
+    finally:
+        await runtime.close()
+    return {}

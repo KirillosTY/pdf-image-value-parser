@@ -72,6 +72,8 @@ class ImageState:
     """Track analysis and storage for one document-attempt/asset/image key."""
 
     result_ref: str | None = None
+    vlm_model: str | None = None
+    formatter_model: str | None = None
     chart_type: str | None = None
     analysis_status: Literal["pending", "running", "completed", "failed"] = "pending"
     fields_ref: str | None = None
@@ -105,7 +107,17 @@ class State:
     started_at: str | None = None
     completed_at: str | None = None
     config: dict[str, Any] = field(default_factory=dict)
-    fill_threshold: int = 5
+    schema_id: str | None = None
+    current_hardware: dict[str, Any] = field(default_factory=dict)
+    system_prompt: str | None = None
+    VLM_INPUT: dict[str, str] = field(default_factory=dict)
+    FORMATTER_INPUT: dict[str, str] = field(default_factory=dict)
+    vlm_queues: dict[str, str] = field(default_factory=dict)
+    formatter_queues: dict[str, str] = field(default_factory=dict)
+    fill_threshold: int = 20
+    resource_plan: list[list[str]] = field(default_factory=list)
+    graph_managed_stages: bool = False
+    manifest_batch: list[str] = field(default_factory=list)
     redis: RedisState = field(default_factory=RedisState)
     docling: DoclingState = field(default_factory=DoclingState)
     queues: QueueState = field(default_factory=QueueState)
@@ -116,6 +128,9 @@ class State:
     processed_event_ids: list[str] = field(default_factory=list)
     current_event: WorkerEvent | None = None
     pending_actions: list[str] = field(default_factory=list)
+    agent_messages: list[dict[str, Any]] = field(default_factory=list)
+    agent_tool_call: dict[str, Any] | None = None
+    agent_input_errors: int = 0
     errors: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:

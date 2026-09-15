@@ -41,7 +41,7 @@ requires = ["setuptools>=83.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["schema_format"]
+py-modules = ["schema_format", "config", "hardware"]
 packages = [
     "agent",
     "figure_parser",
@@ -52,6 +52,7 @@ packages = [
     "parser.src.vlm",
     "parser.src.formatter",
     "parser.src.db",
+    "parser.src.tools",
 ]
 [tool.setuptools.package-dir]
 "" = "src"
@@ -64,6 +65,7 @@ packages = [
 "parser.src.vlm" = "src/vlm"
 "parser.src.formatter" = "src/formatter"
 "parser.src.db" = "src/db"
+"parser.src.tools" = "src/tools"
 
 
 [tool.setuptools.package-data]

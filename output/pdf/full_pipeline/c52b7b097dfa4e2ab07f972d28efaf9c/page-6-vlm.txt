@@ -1,0 +1,21 @@
+The image displays a heatmap titled "Regional score matrix." The chart is a 3x4 grid, representing three regions (North, Central, South) across four quarters (Q1, Q2, Q3, Q4). Each cell in the grid contains an integer value indicating scores. The color gradient on the right side of the image represents the score range from 0 to 12.
+
+Here are the visible data points and observations:
+
+- **North:**
+  - Q1: Score = 1
+  - Q2: Score = 2
+  - Q3: Score = 3
+  - Q4: Score = 4
+
+- **Central:**
+  - Q1: Score = 2
+  - Q2: Score = 4
+  - Q3: Score = 6
+  - Q4: Score = 8
+
+- **South:**
+  - Q1: Score = 3
+  - Q2: Score = 6
+  - Q3: Score = 9
+  - Q4: Score = 12

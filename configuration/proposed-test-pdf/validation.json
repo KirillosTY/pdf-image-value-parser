@@ -1,0 +1,14 @@
+{
+  "configuration_valid": true,
+  "bundle_valid": true,
+  "example_valid": true,
+  "example_rows": 3,
+  "schema_id": "50542627ef06c4340be71de50eb740bc273b743aa81fc044f6728efd60e0ee92",
+  "models": {
+    "chart_reader": "parser-chart-vlm:7b",
+    "chart_formatter": "parser-chart-formatter:7b"
+  },
+  "inference_tested": false,
+  "database_connected": false,
+  "active_configuration_changed": false
+}

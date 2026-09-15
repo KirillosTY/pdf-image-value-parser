@@ -109,6 +109,12 @@ worker = DocumentWorker(run_id=run_id)
 worker.process_folder(input_path, database_engine=engine, resume=False)
 ```
 
+Configured runs additionally store a `config_snapshot` and `schema_id` in
+`run_info`. The associated `schema_versions` record contains the approved
+formatter schemas and SQL mappings. See [../schemas/README.md](../schemas/README.md)
+for setup, database migration, and formatter usage. Recovery retrieves these
+stored definitions rather than reading changed local configuration.
+
 For recovery, pass the existing unfinished `run_id` and `resume=True`. The
 caller must first verify it with `require_incomplete_run()`. After all work and
 the final database batch are complete, call `complete_run()`.
@@ -116,7 +122,11 @@ the final database batch are complete, call `complete_run()`.
 The final image completion atomically adds its manifest key to the Redis sorted
 set `documents:db_ready`. Eligibility requires a successful Docling document,
 at least one accepted image, and complete VLM/formatting for every image.
-One failed image holds back the whole PDF. Below-threshold images are excluded.
+One failed image holds back the whole PDF by default. With the run's approved
+`approve_with_fails="omit"` policy, terminal failed images are stored with
+`images.failed=true` and empty extracted details, alongside successful images
+in the same document transaction. A failed attempt awaiting retry is not yet
+terminal. Below-threshold images are excluded.
 
 ```python
 import os
@@ -135,11 +145,11 @@ while flush_ready(red, engine, batch_size=batch_size, final=True):
     pass
 ```
 
-This is a callable batch writer. The caller is responsible for scheduling it
-and knowing when production/formatting have ended. The main agent's service
-hooks and event transport remain unwired. Formatting Stream consumption, pending
-job reclamation, and acknowledgment still need wiring; publishing the job does
-not itself start a formatting worker.
+The standalone writer above is callable directly. The MainAgent runtime now
+schedules whole-document writes from run-specific model queues, recovers pending
+jobs, and flushes the smaller tail after upstream processing finishes. It calls
+`write_batches` with only that run's ready manifests; the standalone global
+`flush_ready` queue is not used by the runtime.
 
 The writer selects at most 50 manifests and writes all their rows in one
 transaction. Individual SQL statements are capped at 500 rows, but all statements

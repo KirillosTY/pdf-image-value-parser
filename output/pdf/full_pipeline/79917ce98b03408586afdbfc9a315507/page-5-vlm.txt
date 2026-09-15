@@ -1,0 +1,16 @@
+The image is a box plot comparing latency (in milliseconds) across three methods: Method A, Method B, and Method C. The y-axis represents Latency (ms), with values ranging from 0 to approximately 35 ms.
+
+- **Method A**:
+  - Median value appears around 16 ms.
+  - Minimum value is approximately 12 ms.
+  - Maximum value is about 18 ms.
+  
+- **Method B**:
+  - Median value is roughly 24 ms.
+  - Minimum value is around 17 ms.
+  - Maximum value is close to 30 ms.
+
+- **Method C**:
+  - Median value seems to be approximately 13 ms.
+  - Minimum value is about 9 ms.
+  - Maximum value is around 18 ms.

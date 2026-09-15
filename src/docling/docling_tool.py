@@ -58,6 +58,7 @@ class ExtractionContext:
     document_id: str | None
     manifest_key: str
     config: ExtractionConfig
+    redis_client: Any = None
 
 
 def sha256_of_file(path: Path) -> str:
@@ -74,20 +75,21 @@ def minute_timestamp() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
 
 
-def top_classification(picture: Any) -> dict[str, Any] | None:
-    """Return the highest-confidence predicted class for a picture."""
+def top_classifications(picture: Any) -> list[dict[str, Any]]:
+    """Retain the three most confident predictions for image routing."""
     prediction = getattr(getattr(picture, "meta", None), "classification", None)
     predictions = (
         [p.model_dump(mode="json") for p in prediction.predictions]
         if prediction
         else []
     )
-    best = max(predictions, key=lambda p: p["confidence"], default=None)
-    return (
-        {"class_name": best["class_name"], "confidence": best["confidence"]}
-        if best
-        else None
-    )
+    return sorted(predictions, key=lambda p: p["confidence"], reverse=True)[:3]
+
+
+def top_classification(picture: Any) -> dict[str, Any] | None:
+    """Return the leading label with the top three predictions attached."""
+    predictions = top_classifications(picture)
+    return {**predictions[0], "predictions": predictions} if predictions else None
 
 
 def is_chart(classification: dict[str, Any] | None) -> bool:
@@ -162,9 +164,8 @@ def save_crops(
         if image is None:
             raise ValueError(f"No crop returned for page {page_number}")
         try:
-            image_key = store_image(
-                image, context.manifest_key, asset_id, ordinal
-            )
+            options = {"client": context.redis_client} if context.redis_client is not None else {}
+            image_key = store_image(image, context.manifest_key, asset_id, ordinal, **options)
             images.append(
                 ImageMeta(
                     redis_key=image_key,
@@ -174,6 +175,7 @@ def save_crops(
                     height=image.height,
                     class_name=class_name,
                     confidence=confidence,
+                    classifications=classification.get("predictions", []) if classification else [],
                 )
             )
         finally:
@@ -235,10 +237,12 @@ class DocumentWorker:
         config: ExtractionConfig | None = None,
         *,
         run_id: str | None = None,
+        redis_client=None,
     ):
         """Validate the configuration and defer Docling until first use."""
         self.output_dir = Path(output_dir).expanduser().resolve()
         self.config = config or ExtractionConfig()
+        self.redis_client = redis_client
         self.run_id = run_id or hashlib.sha256(
             f"run:{datetime.now(timezone.utc).isoformat()}".encode()
         ).hexdigest()[:32]
@@ -268,7 +272,7 @@ class DocumentWorker:
                 queue_max_size=8,
                 accelerator_options=AcceleratorOptions(device=self.config.device),
             )
-            options.picture_classification_options.engine_options.top_k = 1
+            options.picture_classification_options.engine_options.top_k = 3
             self._converter = DocumentConverter(
                 format_options={
                     InputFormat.PDF: PdfFormatOption(pipeline_options=options)
@@ -281,7 +285,7 @@ class DocumentWorker:
         from docling_core.types.doc.items.table.table import TableItem
 
         if isinstance(item, TableItem):
-            return "table", None
+            return "table", {"class_name": "table", "confidence": 1.0, "predictions": [{"class_name": "table", "confidence": 1.0}]}
         if isinstance(item, PictureItem):
             classification = top_classification(item)
             return ("figure", classification) if is_chart(classification) else None
@@ -309,6 +313,7 @@ class DocumentWorker:
             document_id=manifest.document_id,
             manifest_key=manifest.manifest_key,
             config=self.config,
+            redis_client=self.redis_client,
         )
         manifest.page_count = len(document.pages)
 
@@ -330,16 +335,25 @@ class DocumentWorker:
         *,
         database_engine=None,
         resume: bool = False,
+        publish: bool = True,
     ) -> Manifest:
         """Read one PDF and queue its completed manifest in Redis."""
         if resume and database_engine is None:
             raise ValueError("database_engine is required when resuming a run")
+        run_context = None
+        if database_engine is not None:
+            from parser.src.db.runs import load_run_context
+
+            run_context = load_run_context(database_engine, self.run_id, resume=resume)
         pdf_path = Path(source).expanduser().resolve()
         try:
             document_id = sha256_of_file(pdf_path)
         except OSError:
             document_id = None
         manifest = new_manifest(pdf_path, document_id, run_id=self.run_id)
+        if run_context is not None:
+            manifest.schema_id = run_context["schema_id"]
+            manifest.approve_with_fails = run_context["config"].get("approve_with_fails", False)
         try:
             if document_id is None:
                 raise OSError(f"Could not read {pdf_path}")
@@ -365,7 +379,7 @@ class DocumentWorker:
             manifest.errors.append(f"{type(exc).__name__}: {exc}")
             LOG.exception("Failed processing %s: %s", pdf_path, exc)
         manifest.finished_at = datetime.now(timezone.utc).isoformat()
-        if manifest.status == "completed":
+        if manifest.status == "completed" and publish:
             queue_manifest(manifest, manifest.manifest_key)
         return manifest
 

@@ -1,0 +1,17 @@
+The image contains two panels:
+
+**Panel A: category counts**
+- **Chart Type:** Bar chart.
+- **X-axis Labels:** Low, Medium, High.
+- **Y-axis Label:** Count.
+- **Units on Y-axis:** Counts are shown as numbers (e.g., 18, 31, 24).
+- **Legend:** None visible; the bars are labeled with their respective counts directly.
+
+**Panel B: weekly rate**
+- **Chart Type:** Line chart.
+- **X-axis Labels:** Week (with values 1 through 5).
+- **Y-axis Label:** Rate.
+- **Units on Y-axis:** The y-axis is marked in increments of 0.1, with the highest value shown as 0.5.
+- **Legend:** None visible; a single line connects data points labeled with rates at each week (e.g., Week 1: 0.22, Week 2: 0.28, etc.).
+
+No additional annotations or error bars are present in either panel. The context suggests the image is related to some form of categorization and its corresponding weekly rate over time.

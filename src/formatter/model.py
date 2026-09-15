@@ -123,7 +123,14 @@ class NuExtractFormatter:
             model=os.getenv("FORMATTER_MODEL", "numind/NuExtract3"),
         )
 
-    def format(self, raw_output: str, schema: dict[str, Any]) -> dict[str, Any]:
+    def format(
+        self,
+        raw_output: str,
+        schema: dict[str, Any],
+        *,
+        validation_error: str | None = None,
+        source_context: dict | None = None,
+    ) -> dict[str, Any]:
         """Make one attempt; retain raw text and reject invalid or cut-off output."""
         if not isinstance(raw_output, str) or not raw_output.strip():
             raise ValueError("VLM output is empty")
@@ -138,12 +145,32 @@ class NuExtractFormatter:
             temperature=0,
             max_tokens=self.max_tokens,
             messages=[
-                {"role": "user", "content": [{"type": "text", "text": raw_output}]}
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": raw_output
+                            + (
+                                "\nSource context (not additional measurements):\n"
+                                + json.dumps(source_context)
+                                if source_context
+                                else ""
+                            ),
+                        }
+                    ],
+                }
             ],
             extra_body={
                 "chat_template_kwargs": {
                     "template": json.dumps(template),
-                    "instructions": FORMAT_INSTRUCTIONS,
+                    "instructions": FORMAT_INSTRUCTIONS
+                    + (
+                        "\nCorrect this previous validation error without inventing observations: "
+                        + validation_error
+                        if validation_error
+                        else ""
+                    ),
                     "enable_thinking": False,
                 }
             },

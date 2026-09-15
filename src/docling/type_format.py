@@ -20,6 +20,7 @@ class ImageMeta:
     height: int
     class_name: str | None = None
     confidence: float | None = None
+    classifications: list[dict[str, Any]] = field(default_factory=list)
     vlm_status: Literal["not_started", "processing", "complete", "failed"] = (
         "not_started"
     )
@@ -28,6 +29,9 @@ class ImageMeta:
         "not_started"
     )
     formatting: dict[str, Any] | None = None
+    vlm_retry_count: int = 0
+    format_retry_count: int = 0
+    failed: bool = False
 
 
 @dataclass
@@ -119,3 +123,5 @@ class Manifest:
     )
     db_status: Literal["not_started", "complete"] = "not_started"
     run_id: str | None = None
+    schema_id: str | None = None
+    approve_with_fails: Literal[False, "omit"] = False

@@ -1,0 +1,793 @@
+{
+  "run": {
+    "run_id": "79917ce98b03408586afdbfc9a315507",
+    "status": "incomplete",
+    "started_at": "2026-09-14 11:55:36.490480+00:00",
+    "completed_at": null,
+    "schema_id": "50542627ef06c4340be71de50eb740bc273b743aa81fc044f6728efd60e0ee92",
+    "config_snapshot": {
+      "models": {
+        "chart_reader": {
+          "roles": [
+            "vlm"
+          ],
+          "device": "auto",
+          "context": "Local alias of installed qwen2.5vl:7b (5ced39dfa4ba), with num_ctx=8192. Official model supports image/chart understanding. Installed weights occupy about 6.0 GB on disk; this is not a RAM/VRAM measurement. Peak usage with one crop and this context has not been measured; estimates remain unknown. Ollama controls residency and possible CPU offload; the app's managed-server memory guard does not constrain this external endpoint.",
+          "serving": "external",
+          "model_id": "parser-chart-vlm:7b",
+          "gpu_index": 0,
+          "precision": "Q4_K_M",
+          "api_key_env": null,
+          "chart_types": [
+            "bar_chart",
+            "line_chart",
+            "pie_chart",
+            "scatter_plot",
+            "box_plot",
+            "heatmap",
+            "multi_panel"
+          ],
+          "limitations": [
+            "Numeric accuracy must be measured on the fixture.",
+            "Small labels, unlabeled points, and multi-panel associations can be missed.",
+            "Disk size is not peak memory; concurrent residency of both models is not assumed."
+          ],
+          "source_urls": [
+            "https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct",
+            "https://ollama.com/library/qwen2.5vl:7b",
+            "https://docs.ollama.com/api/openai-compatibility"
+          ],
+          "endpoint_env": "OLLAMA_BASE_URL",
+          "context_window": 8192,
+          "launch_command": [],
+          "estimated_ram_gib": null,
+          "formatter_adapter": "chat",
+          "input_description": "One Docling PNG crop and source context; no output schema or answer key.",
+          "max_output_tokens": 4096,
+          "estimated_vram_gib": null,
+          "output_description": "Unrestricted observations of all panels, visible values, labels, units, and uncertainty.",
+          "requests_per_model": 1,
+          "parameter_count_billions": 8.29
+        },
+        "chart_formatter": {
+          "roles": [
+            "formatter"
+          ],
+          "device": "auto",
+          "context": "Local alias of installed qwen2.5:7b (845dbda0ea48), with num_ctx=16384. Text instruction model supports structured/JSON output, so it can consume the VLM's raw text through the generic chat adapter. Installed weights occupy about 4.7 GB on disk. Peak RAM/VRAM with raw observations, schema, and one output is unmeasured; estimates remain unknown. Ollama manages residency. No separate reasoning/router model is selected.",
+          "serving": "external",
+          "model_id": "parser-chart-formatter:7b",
+          "gpu_index": 0,
+          "precision": "Q4_K_M",
+          "api_key_env": null,
+          "chart_types": [
+            "bar_chart",
+            "line_chart",
+            "pie_chart",
+            "scatter_plot",
+            "box_plot",
+            "heatmap",
+            "multi_panel"
+          ],
+          "limitations": [
+            "Cannot recover values omitted or misread by the VLM.",
+            "Generic chat JSON is validated and may require retries.",
+            "Long outputs can hit the output limit; truncation is treated as failure."
+          ],
+          "source_urls": [
+            "https://ollama.com/library/qwen2.5:7b",
+            "https://docs.ollama.com/api/openai-compatibility"
+          ],
+          "endpoint_env": "OLLAMA_BASE_URL",
+          "context_window": 16384,
+          "launch_command": [],
+          "estimated_ram_gib": null,
+          "formatter_adapter": "chat",
+          "input_description": "VLM raw text, JSON Schema, source context, and any previous validation error.",
+          "max_output_tokens": 8192,
+          "estimated_vram_gib": null,
+          "output_description": "JSON envelope with data matching MEASUREMENTS and unmapped_observations strings.",
+          "requests_per_model": 1,
+          "parameter_count_billions": 7.62
+        }
+      },
+      "hardware": {
+        "cpu": "Intel(R) Core(TM) Ultra 9 185H",
+        "gpus": [
+          {
+            "id": "GPU-df2198aa-9e4d-bb8b-a84b-02a3a482e2e4",
+            "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+            "backend": "cuda",
+            "vram_total_gib": 7.99609375,
+            "vram_available_gib": 7.650390625
+          }
+        ],
+        "notes": [],
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+        "checked_at": "2026-09-14T11:22:53.718148+00:00",
+        "ram_total_gib": 30.449893951416016,
+        "logical_cpu_count": 22,
+        "ram_available_gib": 18.96860122680664
+      },
+      "languages": [
+        "English"
+      ],
+      "recursive": false,
+      "extraction": {},
+      "main_agent": null,
+      "fallback_vlm": "chart_reader",
+      "chart_matcher": {
+        "table": "chart_reader",
+        "box_plot": "chart_reader",
+        "bar_chart": "chart_reader",
+        "pie_chart": "chart_reader",
+        "line_chart": "chart_reader",
+        "scatter_plot": "chart_reader"
+      },
+      "schema_bundle": "schemas/test-pdf/bundle.json",
+      "docling_charts": [
+        "line_chart",
+        "bar_chart",
+        "pie_chart",
+        "scatter_plot",
+        "box_plot",
+        "table"
+      ],
+      "document_types": [
+        "scientific",
+        "business"
+      ],
+      "format_matcher": {
+        "chart_reader": "chart_formatter"
+      },
+      "schema_matcher": {
+        "table": "MEASUREMENTS",
+        "box_plot": "MEASUREMENTS",
+        "bar_chart": "MEASUREMENTS",
+        "pie_chart": "MEASUREMENTS",
+        "line_chart": "MEASUREMENTS",
+        "scatter_plot": "MEASUREMENTS"
+      },
+      "charts_targeted": [
+        "bar_chart",
+        "line_chart",
+        "pie_chart",
+        "scatter_plot",
+        "box_plot",
+        "heatmap",
+        "multi_panel"
+      ],
+      "fallback_schema": "MEASUREMENTS",
+      "manifest_minimum": 1,
+      "model_batch_size": 50,
+      "manifest_capacity": 50,
+      "max_image_retries": 3,
+      "vlm_think_sorting": false,
+      "writer_batch_size": 1,
+      "approve_with_fails": false,
+      "fallback_formatter": "chart_formatter",
+      "memory_reserve_gib": 2,
+      "formatter_think_sorting": false,
+      "accuracy_speed_preference": "accuracy-first; local quantized baseline using the English test PDF"
+    },
+    "outcome": null,
+    "errors": null
+  },
+  "documents": [],
+  "images": [],
+  "details": [],
+  "outputs": {
+    "measurements": []
+  },
+  "manifests": [
+    {
+      "schema_version": 2,
+      "document_id": "e2ac0fc6655fc57842b5317dd875d7f3cf570171633839383b671e92a404b0bf",
+      "pdf_sha256": "de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4",
+      "source_path": "/home/kirilllos/projects/AI/parser/parser/output/pdf/chart_extraction_blind_input.pdf",
+      "name": "chart_extraction_blind_input",
+      "started_at": "2026-09-14T11:55",
+      "status": "completed",
+      "manifest_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+      "assets": [
+        {
+          "asset_id": "6b2bd5f5b02ae1b411a0c11692f7eba8b8bf67fea59a0f53b0d9ea15db748e5d",
+          "name": "figure",
+          "images_meta": [
+            {
+              "redis_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:6b2bd5f5b02ae1b411a0c11692f7eba8b8bf67fea59a0f53b0d9ea15db748e5d:1",
+              "manifest_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+              "page_number": 1,
+              "width": 2320,
+              "height": 1388,
+              "class_name": "bar_chart",
+              "confidence": 0.9988502264022827,
+              "classifications": [
+                {
+                  "confidence": 0.9988502264022827,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "bar_chart"
+                },
+                {
+                  "confidence": 0.0009317017393186688,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "table"
+                },
+                {
+                  "confidence": 0.00010329706856282428,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "screenshot_from_computer"
+                }
+              ],
+              "vlm_status": "complete",
+              "vlm_result": {
+                "raw_output": "The image is a grouped bar chart showing revenue (in thousand USD) for two regions, North and South, over five months: January to May. \n\n- The x-axis represents the months from January to May.\n- The y-axis represents Revenue in thousand USD with values ranging from 0 to approximately 250 thousand USD.\n\nThe legend indicates:\n- Blue bars represent \"North.\"\n- Orange bars represent \"South.\"\n\nHere are the observed revenue values for each month:\n\n**January:**\n- North: 120 (thousand USD)\n- South: 95 (thousand USD)\n\n**February:**\n- North: 150 (thousand USD)\n- South: 125 (thousand USD)\n\n**March:**\n- North: 135 (thousand USD)\n- South: 145 (thousand USD)\n\n**April:**\n- North: 180 (thousand USD)\n- South: 155 (thousand USD)\n\n**May:**\n- North: 210 (thousand USD)\n- South: 190 (thousand USD)",
+                "model": "parser-chart-vlm:7b"
+              },
+              "format_status": "not_started",
+              "formatting": null,
+              "vlm_retry_count": 1,
+              "format_retry_count": 0,
+              "failed": false,
+              "vlm_key": "chart_reader",
+              "attempt_errors": [
+                {
+                  "stage": "vlm",
+                  "error": "APITimeoutError: Request timed out.",
+                  "response": null
+                }
+              ],
+              "formatter_key": "chart_formatter"
+            }
+          ],
+          "context": {
+            "caption": "",
+            "mentions": [],
+            "nearby": [
+              {
+                "text": "Grouped bar chart - values are in thousand USD"
+              }
+            ],
+            "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+            "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+          },
+          "status": "completed",
+          "error": null
+        },
+        {
+          "asset_id": "f70e7649dfaea8a5cdd2c0640b7c51b112b1aad62238e1f46ddcbbfe52028c37",
+          "name": "figure",
+          "images_meta": [
+            {
+              "redis_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:f70e7649dfaea8a5cdd2c0640b7c51b112b1aad62238e1f46ddcbbfe52028c37:1",
+              "manifest_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+              "page_number": 2,
+              "width": 2321,
+              "height": 1376,
+              "class_name": "line_chart",
+              "confidence": 0.9987496137619019,
+              "classifications": [
+                {
+                  "confidence": 0.9987496137619019,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "line_chart"
+                },
+                {
+                  "confidence": 0.0010759111028164625,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "scatter_plot"
+                },
+                {
+                  "confidence": 0.00015421507123392075,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "bar_chart"
+                }
+              ],
+              "vlm_status": "complete",
+              "vlm_result": {
+                "raw_output": "The image is a line chart showing observed values and planned targets over the years 2020 to 2025. The y-axis represents an index, with the base year set as 2020. The x-axis shows the years from 2020 to 2025.\n\n- **Legend**: \n  - Blue circles represent \"Observed\" values.\n  - Green squares represent \"Target\" values.\n\n### Observations:\n\n#### Observed Values:\n- Year: 2020, Index: 42\n- Year: 2021, Index: 48\n- Year: 2022, Index: 57\n- Year: 2023, Index: 55 (The observed value dips below the target)\n- Year: 2024, Index: 68\n- Year: 2025, Index: 76\n\n#### Target Values:\n- Year: 2020, Index: 40\n- Year: 2021, Index: 45 (The target is slightly higher than the observed value)\n- Year: 2022, Index: 50\n- Year: 2023, Index: 57\n- Year: 2024, Index: 68\n- Year: 2025, Index: 73\n\nThe chart shows that the observed values generally follow a trend similar to the target values but with some fluctuations. The observed index surpasses the target in 2024 and continues to rise above it by 2025.",
+                "model": "parser-chart-vlm:7b"
+              },
+              "format_status": "not_started",
+              "formatting": null,
+              "vlm_retry_count": 1,
+              "format_retry_count": 0,
+              "failed": false,
+              "vlm_key": "chart_reader",
+              "attempt_errors": [
+                {
+                  "stage": "vlm",
+                  "error": "APITimeoutError: Request timed out.",
+                  "response": null
+                }
+              ],
+              "formatter_key": "chart_formatter"
+            }
+          ],
+          "context": {
+            "caption": "",
+            "mentions": [],
+            "nearby": [
+              {
+                "text": "Line chart - observed values and planned target Year Response (units)"
+              }
+            ],
+            "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+            "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+          },
+          "status": "completed",
+          "error": null
+        },
+        {
+          "asset_id": "1a1ed936109a3fc7e50df0ba5d5cdbef1a6b9e95fd90c23203b208deb24a72cb",
+          "name": "figure",
+          "images_meta": [
+            {
+              "redis_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:1a1ed936109a3fc7e50df0ba5d5cdbef1a6b9e95fd90c23203b208deb24a72cb:1",
+              "manifest_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+              "page_number": 3,
+              "width": 1473,
+              "height": 1183,
+              "class_name": "pie_chart",
+              "confidence": 0.9998706579208374,
+              "classifications": [
+                {
+                  "confidence": 0.9998706579208374,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "pie_chart"
+                },
+                {
+                  "confidence": 5.860718374606222e-05,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "bar_chart"
+                },
+                {
+                  "confidence": 2.66103379544802e-05,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "table"
+                }
+              ],
+              "vlm_status": "complete",
+              "vlm_result": {
+                "raw_output": "The image is a pie chart showing the market share percentages for different products in 2025. The categories are labeled as follows:\n\n- **Product A**: 40%\n- **Product B**: 30%\n- **Product C**: 20%\n- **Other**: 10%\n\nEach slice of the pie is color-coded, with Product A in blue, Product B in orange, and Product C in green. The \"Other\" category is represented by a gray slice. The percentages are clearly labeled on each corresponding section of the pie chart.",
+                "model": "parser-chart-vlm:7b"
+              },
+              "format_status": "not_started",
+              "formatting": null,
+              "vlm_retry_count": 0,
+              "format_retry_count": 0,
+              "failed": false,
+              "vlm_key": "chart_reader",
+              "formatter_key": "chart_formatter"
+            }
+          ],
+          "context": {
+            "caption": "Pie chart - percentages sum to 100% 2025 market share",
+            "mentions": [],
+            "nearby": [],
+            "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+            "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+          },
+          "status": "completed",
+          "error": null
+        },
+        {
+          "asset_id": "eb712be69ce50092e1704c9a37de242e3ea5e872c99ed0fc80fb0b98024ce188",
+          "name": "figure",
+          "images_meta": [
+            {
+              "redis_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:eb712be69ce50092e1704c9a37de242e3ea5e872c99ed0fc80fb0b98024ce188:1",
+              "manifest_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+              "page_number": 4,
+              "width": 2309,
+              "height": 1411,
+              "class_name": "scatter_plot",
+              "confidence": 0.927399754524231,
+              "classifications": [
+                {
+                  "confidence": 0.927399754524231,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "scatter_plot"
+                },
+                {
+                  "confidence": 0.06065385416150093,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "line_chart"
+                },
+                {
+                  "confidence": 0.0075014992617070675,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "box_plot"
+                }
+              ],
+              "vlm_status": "complete",
+              "vlm_result": {
+                "raw_output": "The image is a scatter plot titled \"Scatter plot - two labeled cohorts.\" It displays data for two groups: Treatment (blue circles) and Control (red triangles). The x-axis represents dose in milligrams (mg), while the y-axis shows response in units.\n\nHere are the visible points:\n\n- **Treatment group**:\n  - Dose = 1 mg, Response \u2248 2.0\n  - Dose = 2 mg, Response \u2248 2.8\n  - Dose = 3 mg, Response \u2248 3.6\n  - Dose = 4 mg, Response \u2248 4.2\n  - Dose = 5 mg, Response \u2248 5.1\n  - Dose = 6 mg, Response \u2248 5.8\n\n- **Control group**:\n  - Dose = 1 mg, Response \u2248 5.9\n  - Dose = 2 mg, Response \u2248 5.3\n  - Dose = 3 mg, Response \u2248 4.8\n  - Dose = 4 mg, Response \u2248 4.0\n  - Dose = 5 mg, Response \u2248 3.3\n  - Dose = 6 mg, Response \u2248 2.7\n\nThe plot does not include any error bars or footnotes. The y-axis is labeled \"Response (units)\" and ranges from approximately 0 to 7 units.",
+                "model": "parser-chart-vlm:7b"
+              },
+              "format_status": "not_started",
+              "formatting": null,
+              "vlm_retry_count": 1,
+              "format_retry_count": 0,
+              "failed": false,
+              "vlm_key": "chart_reader",
+              "attempt_errors": [
+                {
+                  "stage": "vlm",
+                  "error": "APITimeoutError: Request timed out.",
+                  "response": null
+                }
+              ],
+              "formatter_key": "chart_formatter"
+            }
+          ],
+          "context": {
+            "caption": "",
+            "mentions": [],
+            "nearby": [
+              {
+                "text": "Line chart - observed values and planned target Year Response (units)"
+              }
+            ],
+            "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+            "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+          },
+          "status": "completed",
+          "error": null
+        },
+        {
+          "asset_id": "e4dfbc928f63f781bce704fa2803553daa20d82b4ebdaac79dfebfda3ec05552",
+          "name": "figure",
+          "images_meta": [
+            {
+              "redis_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:e4dfbc928f63f781bce704fa2803553daa20d82b4ebdaac79dfebfda3ec05552:1",
+              "manifest_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+              "page_number": 5,
+              "width": 2312,
+              "height": 1410,
+              "class_name": "box_plot",
+              "confidence": 0.9993934631347656,
+              "classifications": [
+                {
+                  "confidence": 0.9993934631347656,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "box_plot"
+                },
+                {
+                  "confidence": 0.0005909822066314518,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "bar_chart"
+                },
+                {
+                  "confidence": 7.619064490427263e-06,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "scatter_plot"
+                }
+              ],
+              "vlm_status": "complete",
+              "vlm_result": {
+                "raw_output": "The image is a box plot comparing latency (in milliseconds) across three methods: Method A, Method B, and Method C. The y-axis represents Latency (ms), with values ranging from 0 to approximately 35 ms.\n\n- **Method A**:\n  - Median value appears around 16 ms.\n  - Minimum value is approximately 12 ms.\n  - Maximum value is about 18 ms.\n  \n- **Method B**:\n  - Median value is roughly 24 ms.\n  - Minimum value is around 17 ms.\n  - Maximum value is close to 30 ms.\n\n- **Method C**:\n  - Median value seems to be approximately 13 ms.\n  - Minimum value is about 9 ms.\n  - Maximum value is around 18 ms.",
+                "model": "parser-chart-vlm:7b"
+              },
+              "format_status": "not_started",
+              "formatting": null,
+              "vlm_retry_count": 0,
+              "format_retry_count": 0,
+              "failed": false,
+              "vlm_key": "chart_reader",
+              "formatter_key": "chart_formatter"
+            }
+          ],
+          "context": {
+            "caption": "",
+            "mentions": [],
+            "nearby": [],
+            "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+            "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+          },
+          "status": "completed",
+          "error": null
+        },
+        {
+          "asset_id": "1114b7ad46a7aa8c39ce35f8e49b504df7853af0f83bd8b1dbf3d244225a5142",
+          "name": "figure",
+          "images_meta": [
+            {
+              "redis_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:1114b7ad46a7aa8c39ce35f8e49b504df7853af0f83bd8b1dbf3d244225a5142:1",
+              "manifest_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+              "page_number": 6,
+              "width": 2178,
+              "height": 1488,
+              "class_name": "scatter_plot",
+              "confidence": 0.3845326900482178,
+              "classifications": [
+                {
+                  "confidence": 0.3845326900482178,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "scatter_plot"
+                },
+                {
+                  "confidence": 0.21189139783382416,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "line_chart"
+                },
+                {
+                  "confidence": 0.1344168335199356,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "engineering_drawing"
+                }
+              ],
+              "vlm_status": "processing",
+              "vlm_result": null,
+              "format_status": "not_started",
+              "formatting": null,
+              "vlm_retry_count": 0,
+              "format_retry_count": 0,
+              "failed": false,
+              "vlm_key": "chart_reader"
+            }
+          ],
+          "context": {
+            "caption": "",
+            "mentions": [],
+            "nearby": [],
+            "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+            "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+          },
+          "status": "completed",
+          "error": null
+        },
+        {
+          "asset_id": "64df108623e654be35d4e0b68ec1fcc285a74238efbc4e99db6de029b613a336",
+          "name": "figure",
+          "images_meta": [
+            {
+              "redis_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:64df108623e654be35d4e0b68ec1fcc285a74238efbc4e99db6de029b613a336:1",
+              "manifest_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+              "page_number": 7,
+              "width": 2316,
+              "height": 1326,
+              "class_name": "line_chart",
+              "confidence": 0.8950604796409607,
+              "classifications": [
+                {
+                  "confidence": 0.8950604796409607,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "line_chart"
+                },
+                {
+                  "confidence": 0.1019173115491867,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "bar_chart"
+                },
+                {
+                  "confidence": 0.0019932955037802458,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "table"
+                }
+              ],
+              "vlm_status": "not_started",
+              "vlm_result": null,
+              "format_status": "not_started",
+              "formatting": null,
+              "vlm_retry_count": 0,
+              "format_retry_count": 0,
+              "failed": false,
+              "vlm_key": "chart_reader"
+            }
+          ],
+          "context": {
+            "caption": "",
+            "mentions": [],
+            "nearby": [
+              {
+                "text": "Week"
+              }
+            ],
+            "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+            "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+          },
+          "status": "completed",
+          "error": null
+        }
+      ],
+      "below_threshold": [],
+      "discarded": [],
+      "errors": [],
+      "docling_version": "2.126.0",
+      "conversion_status": "success",
+      "document_metadata": {
+        "title": null,
+        "authors": [],
+        "publication_year": null,
+        "journal": null,
+        "doi": null,
+        "arxiv_id": null,
+        "abstract": null,
+        "evidence": {},
+        "warnings": [],
+        "organization": null,
+        "publication_date": null
+      },
+      "page_count": 7,
+      "finished_at": "2026-09-14T11:55:44.274506+00:00",
+      "format_status": "not_started",
+      "db_status": "not_started",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "schema_id": "50542627ef06c4340be71de50eb740bc273b743aa81fc044f6728efd60e0ee92",
+      "approve_with_fails": false
+    }
+  ],
+  "events": [
+    {
+      "event_id": "docling.pdf_queued:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347::docling",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "docling.pdf_queued",
+      "source": "docling",
+      "timestamp": "2026-09-14T11:55:44.276524+00:00",
+      "document_attempt_id": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": null,
+      "image_keys": [
+        "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:6b2bd5f5b02ae1b411a0c11692f7eba8b8bf67fea59a0f53b0d9ea15db748e5d:1",
+        "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:f70e7649dfaea8a5cdd2c0640b7c51b112b1aad62238e1f46ddcbbfe52028c37:1",
+        "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:1a1ed936109a3fc7e50df0ba5d5cdbef1a6b9e95fd90c23203b208deb24a72cb:1",
+        "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:eb712be69ce50092e1704c9a37de242e3ea5e872c99ed0fc80fb0b98024ce188:1",
+        "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:e4dfbc928f63f781bce704fa2803553daa20d82b4ebdaac79dfebfda3ec05552:1",
+        "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:1114b7ad46a7aa8c39ce35f8e49b504df7853af0f83bd8b1dbf3d244225a5142:1",
+        "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:64df108623e654be35d4e0b68ec1fcc285a74238efbc4e99db6de029b613a336:1"
+      ],
+      "image_key": null,
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "docling.filled:::docling",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "docling.filled",
+      "source": "docling",
+      "timestamp": "2026-09-14T11:55:44.279216+00:00",
+      "document_attempt_id": null,
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": null,
+      "image_keys": [],
+      "image_key": null,
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "docling.completed:::docling",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "docling.completed",
+      "source": "docling",
+      "timestamp": "2026-09-14T11:55:44.279892+00:00",
+      "document_attempt_id": null,
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": null,
+      "image_keys": [],
+      "image_key": null,
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "vlm.pdf_claimed:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347::vlm",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "vlm.pdf_claimed",
+      "source": "vlm",
+      "timestamp": "2026-09-14T11:55:44.290104+00:00",
+      "document_attempt_id": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": null,
+      "image_keys": [],
+      "image_key": null,
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "vlm.image_completed:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:6b2bd5f5b02ae1b411a0c11692f7eba8b8bf67fea59a0f53b0d9ea15db748e5d:1:vlm",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "vlm.image_completed",
+      "source": "vlm",
+      "timestamp": "2026-09-14T11:57:55.957522+00:00",
+      "document_attempt_id": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:6b2bd5f5b02ae1b411a0c11692f7eba8b8bf67fea59a0f53b0d9ea15db748e5d:1:vlm_result",
+      "error": null,
+      "image_keys": [],
+      "image_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:6b2bd5f5b02ae1b411a0c11692f7eba8b8bf67fea59a0f53b0d9ea15db748e5d:1",
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "vlm.image_completed:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:f70e7649dfaea8a5cdd2c0640b7c51b112b1aad62238e1f46ddcbbfe52028c37:1:vlm",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "vlm.image_completed",
+      "source": "vlm",
+      "timestamp": "2026-09-14T12:00:12.534381+00:00",
+      "document_attempt_id": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:f70e7649dfaea8a5cdd2c0640b7c51b112b1aad62238e1f46ddcbbfe52028c37:1:vlm_result",
+      "error": null,
+      "image_keys": [],
+      "image_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:f70e7649dfaea8a5cdd2c0640b7c51b112b1aad62238e1f46ddcbbfe52028c37:1",
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "vlm.image_completed:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:1a1ed936109a3fc7e50df0ba5d5cdbef1a6b9e95fd90c23203b208deb24a72cb:1:vlm",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "vlm.image_completed",
+      "source": "vlm",
+      "timestamp": "2026-09-14T12:01:11.098137+00:00",
+      "document_attempt_id": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:1a1ed936109a3fc7e50df0ba5d5cdbef1a6b9e95fd90c23203b208deb24a72cb:1:vlm_result",
+      "error": null,
+      "image_keys": [],
+      "image_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:1a1ed936109a3fc7e50df0ba5d5cdbef1a6b9e95fd90c23203b208deb24a72cb:1",
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "vlm.image_completed:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:eb712be69ce50092e1704c9a37de242e3ea5e872c99ed0fc80fb0b98024ce188:1:vlm",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "vlm.image_completed",
+      "source": "vlm",
+      "timestamp": "2026-09-14T12:03:25.992250+00:00",
+      "document_attempt_id": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:eb712be69ce50092e1704c9a37de242e3ea5e872c99ed0fc80fb0b98024ce188:1:vlm_result",
+      "error": null,
+      "image_keys": [],
+      "image_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:eb712be69ce50092e1704c9a37de242e3ea5e872c99ed0fc80fb0b98024ce188:1",
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "vlm.image_completed:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:e4dfbc928f63f781bce704fa2803553daa20d82b4ebdaac79dfebfda3ec05552:1:vlm",
+      "run_id": "79917ce98b03408586afdbfc9a315507",
+      "kind": "vlm.image_completed",
+      "source": "vlm",
+      "timestamp": "2026-09-14T12:05:21.840240+00:00",
+      "document_attempt_id": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:e4dfbc928f63f781bce704fa2803553daa20d82b4ebdaac79dfebfda3ec05552:1:vlm_result",
+      "error": null,
+      "image_keys": [],
+      "image_key": "manifest:de7f8266523aa9d10aa4e1e8cc5d52e2777a058a1ebd8e3fd5f02a37c0c667a4:ea83e20671a8432397f3633e171db347:image:e4dfbc928f63f781bce704fa2803553daa20d82b4ebdaac79dfebfda3ec05552:1",
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    }
+  ]
+}

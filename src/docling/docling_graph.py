@@ -21,6 +21,7 @@ class ExtractionState(TypedDict, total=False):
     input_path: str
     output_dir: str
     config: dict[str, Any]
+    pipeline_config: dict[str, Any]
     recursive: bool
     run_id: str
     database_url: str
@@ -42,13 +43,26 @@ def extract_folder(state: ExtractionState) -> dict[str, Any]:
         ExtractionConfig(**state.get("config", {})),
         run_id=state.get("run_id"),
     )
-    if database_engine is not None:
-        if state.get("resume"):
-            require_incomplete_run(database_engine, worker.run_id)
-        else:
-            start_run(database_engine, run_id=worker.run_id)
     counts: Counter[str] = Counter()
     try:
+        if state.get("pipeline_config") is not None and database_engine is None:
+            raise ValueError("database_url is required to snapshot pipeline_config")
+        if database_engine is not None:
+            if state.get("resume"):
+                if not state.get("run_id"):
+                    raise ValueError("An existing run_id is required for resume")
+                require_incomplete_run(database_engine, worker.run_id)
+            else:
+                from config import PipelineConfig
+
+                configured = state.get("pipeline_config")
+                start_run(
+                    database_engine,
+                    run_id=worker.run_id,
+                    config=PipelineConfig.from_dict(configured)
+                    if configured is not None
+                    else None,
+                )
         manifests = worker.process_folder(
             state["input_path"],
             recursive=state.get("recursive", False),

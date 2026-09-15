@@ -1,0 +1,1841 @@
+{
+  "name": "charts-v1",
+  "mapping": "charts-v1",
+  "formatter_schemas": {
+    "BAR_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "BAR_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "series": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "category",
+              "series",
+              "value"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "LINE_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "LINE_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "series": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "category",
+              "series",
+              "value"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "AREA_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "AREA_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "series": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "category",
+              "series",
+              "value"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "RADAR_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "RADAR_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "series": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "category",
+              "series",
+              "value"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "PIE_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "PIE_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ]
+          }
+        },
+        "donut": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "FUNNEL_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "FUNNEL_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "SCATTER_PLOT": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "SCATTER_PLOT"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "series": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "x",
+              "y"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "BUBBLE_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "BUBBLE_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "size": {
+                "type": "number"
+              },
+              "series": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "size"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "HISTOGRAM": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "HISTOGRAM"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "bin_start": {
+                "type": "number"
+              },
+              "bin_end": {
+                "type": "number"
+              },
+              "count": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "bin_start",
+              "bin_end",
+              "count"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "BOX_PLOT": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "BOX_PLOT"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "group": {
+                "type": "string"
+              },
+              "minimum": {
+                "type": "number"
+              },
+              "q1": {
+                "type": "number"
+              },
+              "median": {
+                "type": "number"
+              },
+              "q3": {
+                "type": "number"
+              },
+              "maximum": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "group",
+              "minimum",
+              "q1",
+              "median",
+              "q3",
+              "maximum"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "HEATMAP": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "HEATMAP"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "string"
+              },
+              "y": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "value"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "CANDLESTICK": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "CANDLESTICK"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "open": {
+                "type": "number"
+              },
+              "high": {
+                "type": "number"
+              },
+              "low": {
+                "type": "number"
+              },
+              "close": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "date",
+              "open",
+              "high",
+              "low",
+              "close"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "WATERFALL": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "WATERFALL"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              },
+              "is_total": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "label",
+              "value",
+              "is_total"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "data"
+      ]
+    },
+    "FLOW_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "FLOW_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string"
+              },
+              "target": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "source",
+              "target"
+            ]
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "nodes",
+        "edges"
+      ]
+    },
+    "COMBO_CHART": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "COMBO_CHART"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "series": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "category",
+              "series",
+              "value"
+            ]
+          }
+        },
+        "series_types": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "series": {
+                "type": "string"
+              },
+              "render_type": {
+                "type": "string",
+                "enum": [
+                  "bar",
+                  "line",
+                  "area"
+                ]
+              },
+              "axis": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary"
+                ]
+              }
+            },
+            "required": [
+              "series",
+              "render_type"
+            ]
+          }
+        },
+        "secondary_y_axis_label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "chart_type",
+        "data",
+        "series_types"
+      ]
+    },
+    "UNKNOWN": {
+      "type": "object",
+      "properties": {
+        "chart_type": {
+          "type": "string",
+          "const": "UNKNOWN"
+        },
+        "title": {
+          "type": "string"
+        },
+        "x_axis_label": {
+          "type": "string"
+        },
+        "y_axis_label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "stacking": {
+          "type": "string",
+          "enum": [
+            "none",
+            "stacked",
+            "percent"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "chart_type",
+        "observations"
+      ]
+    }
+  },
+  "sql_tables": {
+    "charts": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "image_key": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": [
+          "images.image_key"
+        ]
+      },
+      "chart_type": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "panel_label": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "title": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "x_axis_label": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "y_axis_label": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "secondary_y_axis_label": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "unit": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "orientation": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "stacking": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "source": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "donut": {
+        "type": "BOOLEAN",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "extraction_details": {
+      "image_key": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "images.image_key"
+        ]
+      },
+      "formatter_model": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "schema": {
+        "type": "JSONB",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "model_response": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "formatted_data": {
+        "type": "JSONB",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      },
+      "unmapped_observations": {
+        "type": "JSONB",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "area_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "category": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "series": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "bar_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "category": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "series": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "box_statistics": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "group": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "minimum": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "q1": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "median": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "q3": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "maximum": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "bubble_points": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "x": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "y": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "size": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "series": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "candlestick_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "date": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "open": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "high": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "low": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "close": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "combo_series": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "series": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "render_type": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "axis": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "combo_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "category": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "series": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "flow_edges": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "source": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "target": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "label": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "flow_nodes": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "label": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "funnel_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "label": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "heatmap_cells": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "x": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "y": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "histogram_bins": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "bin_start": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "bin_end": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "count": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "line_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "category": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "series": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "pie_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "label": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "radar_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "category": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "series": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "scatter_points": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "x": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "y": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "series": {
+        "type": "TEXT",
+        "nullable": true,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "unknown_observations": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "observation": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    },
+    "waterfall_values": {
+      "chart_id": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": true,
+        "references": [
+          "charts.chart_id"
+        ]
+      },
+      "ordinal": {
+        "type": "INTEGER",
+        "nullable": false,
+        "primary_key": true,
+        "references": []
+      },
+      "label": {
+        "type": "TEXT",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "value": {
+        "type": "NUMERIC",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      },
+      "is_total": {
+        "type": "BOOLEAN",
+        "nullable": false,
+        "primary_key": false,
+        "references": []
+      }
+    }
+  }
+}

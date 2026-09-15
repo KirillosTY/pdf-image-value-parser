@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    ports:
+      - "127.0.0.1:15432:5432"
+    environment:
+      POSTGRES_USER: parser_test
+      POSTGRES_DB: parser_test
+      POSTGRES_PASSWORD: ${PARSER_TEST_DB_PASSWORD:?Generate local test credentials first}
+    volumes:
+      - parser_test_postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parser_test -d parser_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      - "127.0.0.1:16379:6379"
+    environment:
+      REDIS_ARGS: "--appendonly yes"
+    volumes:
+      - parser_test_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+volumes:
+  parser_test_postgres:
+  parser_test_redis:

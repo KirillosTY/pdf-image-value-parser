@@ -1,0 +1,420 @@
+{
+  "run": {
+    "run_id": "7d1f23832ca641aa832a3df0a2f56092",
+    "status": "complete",
+    "started_at": "2026-09-14 12:15:27.289588+00:00",
+    "completed_at": "2026-09-14 12:19:14.883768+00:00",
+    "schema_id": "50542627ef06c4340be71de50eb740bc273b743aa81fc044f6728efd60e0ee92",
+    "config_snapshot": {
+      "models": {
+        "chart_reader": {
+          "roles": [
+            "vlm"
+          ],
+          "device": "auto",
+          "context": "Local alias of installed qwen2.5vl:7b (5ced39dfa4ba), with num_ctx=8192. Official model supports image/chart understanding. Installed weights occupy about 6.0 GB on disk; this is not a RAM/VRAM measurement. Peak usage with one crop and this context has not been measured; estimates remain unknown. Ollama controls residency and possible CPU offload; the app's managed-server memory guard does not constrain this external endpoint.",
+          "serving": "external",
+          "model_id": "parser-chart-vlm:7b",
+          "gpu_index": 0,
+          "precision": "Q4_K_M",
+          "api_key_env": null,
+          "chart_types": [
+            "bar_chart",
+            "line_chart",
+            "pie_chart",
+            "scatter_plot",
+            "box_plot",
+            "heatmap",
+            "multi_panel"
+          ],
+          "limitations": [
+            "Numeric accuracy must be measured on the fixture.",
+            "Small labels, unlabeled points, and multi-panel associations can be missed.",
+            "Disk size is not peak memory; concurrent residency of both models is not assumed."
+          ],
+          "source_urls": [
+            "https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct",
+            "https://ollama.com/library/qwen2.5vl:7b",
+            "https://docs.ollama.com/api/openai-compatibility"
+          ],
+          "endpoint_env": "OLLAMA_BASE_URL",
+          "context_window": 8192,
+          "launch_command": [],
+          "estimated_ram_gib": null,
+          "formatter_adapter": "chat",
+          "input_description": "One Docling PNG crop and source context; no output schema or answer key.",
+          "max_output_tokens": 4096,
+          "estimated_vram_gib": null,
+          "output_description": "Unrestricted observations of all panels, visible values, labels, units, and uncertainty.",
+          "requests_per_model": 1,
+          "parameter_count_billions": 8.29
+        },
+        "chart_formatter": {
+          "roles": [
+            "formatter"
+          ],
+          "device": "auto",
+          "context": "Local alias of installed qwen2.5:7b (845dbda0ea48), with num_ctx=16384. Text instruction model supports structured/JSON output, so it can consume the VLM's raw text through the generic chat adapter. Installed weights occupy about 4.7 GB on disk. Peak RAM/VRAM with raw observations, schema, and one output is unmeasured; estimates remain unknown. Ollama manages residency. No separate reasoning/router model is selected.",
+          "serving": "external",
+          "model_id": "parser-chart-formatter:7b",
+          "gpu_index": 0,
+          "precision": "Q4_K_M",
+          "api_key_env": null,
+          "chart_types": [
+            "bar_chart",
+            "line_chart",
+            "pie_chart",
+            "scatter_plot",
+            "box_plot",
+            "heatmap",
+            "multi_panel"
+          ],
+          "limitations": [
+            "Cannot recover values omitted or misread by the VLM.",
+            "Generic chat JSON is validated and may require retries.",
+            "Long outputs can hit the output limit; truncation is treated as failure."
+          ],
+          "source_urls": [
+            "https://ollama.com/library/qwen2.5:7b",
+            "https://docs.ollama.com/api/openai-compatibility"
+          ],
+          "endpoint_env": "OLLAMA_BASE_URL",
+          "context_window": 16384,
+          "launch_command": [],
+          "estimated_ram_gib": null,
+          "formatter_adapter": "chat",
+          "input_description": "VLM raw text, JSON Schema, source context, and any previous validation error.",
+          "max_output_tokens": 8192,
+          "estimated_vram_gib": null,
+          "output_description": "JSON envelope with data matching MEASUREMENTS and unmapped_observations strings.",
+          "requests_per_model": 1,
+          "parameter_count_billions": 7.62
+        }
+      },
+      "hardware": {
+        "cpu": "Intel(R) Core(TM) Ultra 9 185H",
+        "gpus": [
+          {
+            "id": "GPU-df2198aa-9e4d-bb8b-a84b-02a3a482e2e4",
+            "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+            "backend": "cuda",
+            "vram_total_gib": 7.99609375,
+            "vram_available_gib": 7.650390625
+          }
+        ],
+        "notes": [],
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+        "checked_at": "2026-09-14T11:22:53.718148+00:00",
+        "ram_total_gib": 30.449893951416016,
+        "logical_cpu_count": 22,
+        "ram_available_gib": 18.96860122680664
+      },
+      "languages": [
+        "English"
+      ],
+      "recursive": false,
+      "extraction": {},
+      "main_agent": null,
+      "fallback_vlm": "chart_reader",
+      "chart_matcher": {
+        "table": "chart_reader",
+        "box_plot": "chart_reader",
+        "bar_chart": "chart_reader",
+        "pie_chart": "chart_reader",
+        "line_chart": "chart_reader",
+        "scatter_plot": "chart_reader"
+      },
+      "schema_bundle": "schemas/test-pdf/bundle.json",
+      "docling_charts": [
+        "line_chart",
+        "bar_chart",
+        "pie_chart",
+        "scatter_plot",
+        "box_plot",
+        "table"
+      ],
+      "document_types": [
+        "scientific",
+        "business"
+      ],
+      "format_matcher": {
+        "chart_reader": "chart_formatter"
+      },
+      "schema_matcher": {
+        "table": "MEASUREMENTS",
+        "box_plot": "MEASUREMENTS",
+        "bar_chart": "MEASUREMENTS",
+        "pie_chart": "MEASUREMENTS",
+        "line_chart": "MEASUREMENTS",
+        "scatter_plot": "MEASUREMENTS"
+      },
+      "charts_targeted": [
+        "bar_chart",
+        "line_chart",
+        "pie_chart",
+        "scatter_plot",
+        "box_plot",
+        "heatmap",
+        "multi_panel"
+      ],
+      "fallback_schema": "MEASUREMENTS",
+      "manifest_minimum": 1,
+      "model_batch_size": 50,
+      "manifest_capacity": 50,
+      "max_image_retries": 3,
+      "vlm_think_sorting": false,
+      "writer_batch_size": 1,
+      "approve_with_fails": false,
+      "fallback_formatter": "chart_formatter",
+      "memory_reserve_gib": 2,
+      "formatter_think_sorting": false,
+      "accuracy_speed_preference": "accuracy-first; local quantized baseline using the English test PDF"
+    },
+    "outcome": "completed_with_errors",
+    "errors": [
+      "FormattingError: Expecting value: line 1 column 1 (char 0)"
+    ]
+  },
+  "documents": [],
+  "images": [],
+  "details": [],
+  "outputs": {
+    "measurements": []
+  },
+  "manifests": [
+    {
+      "schema_version": 2,
+      "document_id": "b41fafacf6dcb8a55086040b52e1602330629e6d266713523138a87b33e1b694",
+      "pdf_sha256": "4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb",
+      "source_path": "/home/kirilllos/projects/AI/parser/parser/output/pdf/chart_extraction_memory_input.pdf",
+      "name": "chart_extraction_memory_input",
+      "started_at": "2026-09-14T12:15",
+      "status": "completed",
+      "manifest_key": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee",
+      "assets": [
+        {
+          "asset_id": "bbe8821ddb87c5fea625459c5f209047ca2afdecf5f4c6e24ef0dc41223d2ff7",
+          "name": "figure",
+          "images_meta": [
+            {
+              "redis_key": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:image:bbe8821ddb87c5fea625459c5f209047ca2afdecf5f4c6e24ef0dc41223d2ff7:1",
+              "manifest_key": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee",
+              "page_number": 1,
+              "width": 2320,
+              "height": 1388,
+              "class_name": "bar_chart",
+              "confidence": 0.9988518953323364,
+              "classifications": [
+                {
+                  "confidence": 0.9988518953323364,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "bar_chart"
+                },
+                {
+                  "confidence": 0.0009301412501372397,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "table"
+                },
+                {
+                  "confidence": 0.00010315558029105887,
+                  "created_by": "DocumentPictureClassifier",
+                  "class_name": "screenshot_from_computer"
+                }
+              ],
+              "vlm_status": "complete",
+              "vlm_result": {
+                "raw_output": "The image is a grouped bar chart showing revenue (in thousand USD) for two regions, North and South, over five months: January to May. The x-axis represents the months with categories labeled as Jan, Feb, Mar, Apr, and May. The y-axis indicates revenue in thousand USD.\n\n- **North**:\n  - January: 120\n  - February: 150\n  - March: 135\n  - April: 180\n  - May: 210\n\n- **South**:\n  - January: 95\n  - February: 125\n  - March: 145\n  - April: 155\n  - May: 190\n\nThe chart uses blue bars for the North and orange bars for the South. The revenue values are clearly marked on top of each bar, with no additional annotations or error bars visible in this image.",
+                "model": "parser-chart-vlm:7b"
+              },
+              "format_status": "failed",
+              "formatting": null,
+              "vlm_retry_count": 1,
+              "format_retry_count": 3,
+              "failed": true,
+              "vlm_key": "chart_reader",
+              "attempt_errors": [
+                {
+                  "stage": "vlm",
+                  "error": "APITimeoutError: Request timed out.",
+                  "response": null
+                },
+                {
+                  "stage": "formatter",
+                  "error": "FormattingError: Expecting value: line 1 column 1 (char 0)",
+                  "response": "```json\n{\n  \"data\": {\n    \"measurements\": [\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"Jan\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 120,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"Feb\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 150,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"Mar\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 135,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"Apr\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 180,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"May\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 210,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"Jan\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 95,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"Feb\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 125,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"Mar\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 145,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"Apr\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 155,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"May\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 190,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\",\n        \"notes\": null\n      }\n    ]\n  },\n  \"unmapped_observations\": []\n}\n```"
+                },
+                {
+                  "stage": "formatter",
+                  "error": "FormattingError: Expecting value: line 1 column 1 (char 0)",
+                  "response": "```json\n{\n  \"data\": {\n    \"measurements\": [\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"Jan\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 120,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"Feb\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 150,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"Mar\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 135,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"Apr\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 180,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"North\",\n        \"category\": \"May\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 210,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"Jan\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 95,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"Feb\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 125,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"Mar\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 145,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"Apr\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 155,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      },\n      {\n        \"panel\": \"1\",\n        \"chart_type\": \"bar_chart\",\n        \"title\": null,\n        \"series\": \"South\",\n        \"category\": \"May\",\n        \"x\": null,\n        \"y\": null,\n        \"value\": 190,\n        \"statistic\": null,\n        \"unit\": \"thousand USD\",\n        \"reading\": \"printed\"\n      }\n    ]\n  },\n  \"unmapped_observations\": []\n}\n```"
+                },
+                {
+                  "stage": "formatter",
+                  "error": "FormattingError: Expecting value: line 1 column 1 (char 0)",
+                  "response": "```json\n{\n    \"data\": {\n        \"measurements\": [\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"Jan\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 120,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"Feb\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 150,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"Mar\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 135,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"Apr\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 180,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"May\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 210,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"Jan\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 95,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"Feb\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 125,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"Mar\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 145,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"Apr\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 155,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"May\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 190,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            }\n        ]\n    },\n    \"unmapped_observations\": [\n        \"The chart uses blue bars for the North and orange bars for the South. The revenue values are clearly marked on top of each bar, with no additional annotations or error bars visible in this image.\"\n    ]\n}\n```"
+                },
+                {
+                  "stage": "formatter",
+                  "error": "FormattingError: Expecting value: line 1 column 1 (char 0)",
+                  "response": "```json\n{\n    \"data\": {\n        \"measurements\": [\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"Jan\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 120,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"Feb\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 150,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"Mar\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 135,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"Apr\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 180,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"North\",\n                \"category\": \"May\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 210,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"Jan\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 95,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"Feb\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 125,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"Mar\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 145,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"Apr\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 155,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            },\n            {\n                \"panel\": \"1\",\n                \"chart_type\": \"bar_chart\",\n                \"title\": null,\n                \"series\": \"South\",\n                \"category\": \"May\",\n                \"x\": null,\n                \"y\": null,\n                \"value\": 190,\n                \"statistic\": null,\n                \"unit\": \"thousand USD\",\n                \"reading\": \"printed\",\n                \"notes\": null\n            }\n        ]\n    },\n    \"unmapped_observations\": [\n        \"The chart uses blue bars for the North and orange bars for the South. The revenue values are clearly marked on top of each bar, with no additional annotations or error bars visible in this image.\"\n    ]\n}\n```"
+                }
+              ],
+              "formatter_key": "chart_formatter",
+              "error": "FormattingError: Expecting value: line 1 column 1 (char 0)"
+            }
+          ],
+          "context": {
+            "caption": "",
+            "mentions": [],
+            "nearby": [
+              {
+                "text": "Grouped bar chart - values are in thousand USD"
+              }
+            ],
+            "text_policy": "verbatim_docling_text; mentions join continuation blocks with spaces and mark unavailable equation text; no generated summary",
+            "matching_policy": "explicit figure/table labels; nearby does not imply relevance"
+          },
+          "status": "completed",
+          "error": null
+        }
+      ],
+      "below_threshold": [],
+      "discarded": [],
+      "errors": [],
+      "docling_version": "2.126.0",
+      "conversion_status": "success",
+      "document_metadata": {
+        "title": null,
+        "authors": [],
+        "publication_year": null,
+        "journal": null,
+        "doi": null,
+        "arxiv_id": null,
+        "abstract": null,
+        "evidence": {},
+        "warnings": [],
+        "organization": null,
+        "publication_date": null
+      },
+      "page_count": 1,
+      "finished_at": "2026-09-14T12:15:34.090487+00:00",
+      "format_status": "failed",
+      "db_status": "not_started",
+      "run_id": "7d1f23832ca641aa832a3df0a2f56092",
+      "schema_id": "50542627ef06c4340be71de50eb740bc273b743aa81fc044f6728efd60e0ee92",
+      "approve_with_fails": false
+    }
+  ],
+  "events": [
+    {
+      "event_id": "docling.pdf_queued:manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee::docling",
+      "run_id": "7d1f23832ca641aa832a3df0a2f56092",
+      "kind": "docling.pdf_queued",
+      "source": "docling",
+      "timestamp": "2026-09-14T12:15:34.091587+00:00",
+      "document_attempt_id": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": null,
+      "image_keys": [
+        "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:image:bbe8821ddb87c5fea625459c5f209047ca2afdecf5f4c6e24ef0dc41223d2ff7:1"
+      ],
+      "image_key": null,
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "docling.filled:::docling",
+      "run_id": "7d1f23832ca641aa832a3df0a2f56092",
+      "kind": "docling.filled",
+      "source": "docling",
+      "timestamp": "2026-09-14T12:15:34.094147+00:00",
+      "document_attempt_id": null,
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": null,
+      "image_keys": [],
+      "image_key": null,
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "docling.completed:::docling",
+      "run_id": "7d1f23832ca641aa832a3df0a2f56092",
+      "kind": "docling.completed",
+      "source": "docling",
+      "timestamp": "2026-09-14T12:15:34.095548+00:00",
+      "document_attempt_id": null,
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": null,
+      "image_keys": [],
+      "image_key": null,
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "vlm.pdf_claimed:manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee::vlm",
+      "run_id": "7d1f23832ca641aa832a3df0a2f56092",
+      "kind": "vlm.pdf_claimed",
+      "source": "vlm",
+      "timestamp": "2026-09-14T12:15:34.104230+00:00",
+      "document_attempt_id": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": null,
+      "image_keys": [],
+      "image_key": null,
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "vlm.image_completed:manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:image:bbe8821ddb87c5fea625459c5f209047ca2afdecf5f4c6e24ef0dc41223d2ff7:1:vlm",
+      "run_id": "7d1f23832ca641aa832a3df0a2f56092",
+      "kind": "vlm.image_completed",
+      "source": "vlm",
+      "timestamp": "2026-09-14T12:17:43.219075+00:00",
+      "document_attempt_id": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:image:bbe8821ddb87c5fea625459c5f209047ca2afdecf5f4c6e24ef0dc41223d2ff7:1:vlm_result",
+      "error": null,
+      "image_keys": [],
+      "image_key": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:image:bbe8821ddb87c5fea625459c5f209047ca2afdecf5f4c6e24ef0dc41223d2ff7:1",
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    },
+    {
+      "event_id": "worker.item_failed:manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:image:bbe8821ddb87c5fea625459c5f209047ca2afdecf5f4c6e24ef0dc41223d2ff7:1:formatter",
+      "run_id": "7d1f23832ca641aa832a3df0a2f56092",
+      "kind": "worker.item_failed",
+      "source": "formatter",
+      "timestamp": "2026-09-14T12:19:14.873210+00:00",
+      "document_attempt_id": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee",
+      "asset_id": null,
+      "image_ordinal": null,
+      "payload_ref": null,
+      "error": "FormattingError: Expecting value: line 1 column 1 (char 0)",
+      "image_keys": [],
+      "image_key": "manifest:4532ed13b0734da52cd6bc4e71bd81b1d830bb672551e56520cdb8e579db63bb:d1e47466bc044c558e895504b34fd2ee:image:bbe8821ddb87c5fea625459c5f209047ca2afdecf5f4c6e24ef0dc41223d2ff7:1",
+      "chart_type": null,
+      "record_id": null,
+      "unmapped_observations_ref": null,
+      "outcome": null
+    }
+  ]
+}

@@ -20,12 +20,30 @@ from schema_format import CHART_SCHEMAS
 
 metadata = MetaData()
 
+schema_versions = Table(
+    "schema_versions",
+    metadata,
+    Column("schema_id", Text, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("definition", JSONB, nullable=False),
+    Column(
+        "created_at", DateTime(timezone=True), nullable=False, server_default=func.now()
+    ),
+)
+
 run_info = Table(
-    "run_info", metadata,
+    "run_info",
+    metadata,
     Column("run_id", Text, primary_key=True),
     Column("status", Text, nullable=False, server_default="incomplete"),
-    Column("started_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column(
+        "started_at", DateTime(timezone=True), nullable=False, server_default=func.now()
+    ),
     Column("completed_at", DateTime(timezone=True)),
+    Column("schema_id", Text, ForeignKey("schema_versions.schema_id"), nullable=False),
+    Column("config_snapshot", JSONB, nullable=False),
+    Column("outcome", Text),
+    Column("errors", JSONB),
     CheckConstraint("status IN ('incomplete', 'complete')", name="run_info_status"),
 )
 
@@ -62,7 +80,8 @@ images = Table(
     Column("page_number", Integer, nullable=False),
     Column("width", Integer, nullable=False),
     Column("height", Integer, nullable=False),
-    Column("raw_output", Text, nullable=False),
+    Column("raw_output", Text),
+    Column("failed", Boolean, nullable=False, server_default="false"),
     Column("vlm_model", Text),
     Column("context", JSONB),
 )
@@ -89,11 +108,11 @@ extraction_details = Table(
     "extraction_details",
     metadata,
     Column("image_key", Text, ForeignKey("images.image_key"), primary_key=True),
-    Column("formatter_model", Text, nullable=False),
-    Column("schema", JSONB, nullable=False),
-    Column("model_response", Text, nullable=False),
-    Column("formatted_data", JSONB, nullable=False),
-    Column("unmapped_observations", JSONB, nullable=False),
+    Column("formatter_model", Text),
+    Column("schema", JSONB(none_as_null=True)),
+    Column("model_response", Text),
+    Column("formatted_data", JSONB(none_as_null=True)),
+    Column("unmapped_observations", JSONB(none_as_null=True)),
 )
 
 # Names are fixed in code, never constructed from model output.

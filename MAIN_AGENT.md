@@ -1,178 +1,149 @@
-# Main agent orchestration contract
+# MainAgent pipeline
 
-The coordinator implements state transitions and event routing; external worker
-adapters remain unfinished. The main agent owns the state of the whole run; workers
-report events that it uses to update their respective state sections.
+The Studio graph follows the actual processing stages in
+[src/agent/graph.py](src/agent/graph.py). Its exported definition is
+[architecture/main_agent_graph.mmd](architecture/main_agent_graph.mmd).
 
-## Execution flow
+```mermaid
+flowchart TD
+    D[Docling: next document batch] -->|VLM thinking on| A[MainAgent routes images]
+    D -->|VLM thinking off| R[Route images directly]
+    A --> V[VLM: run image queues]
+    R --> V
+    V -->|Formatter thinking on| B[MainAgent routes outputs]
+    V -->|Formatter thinking off| S[Route outputs directly]
+    B --> F[Formatter: run output queues]
+    S --> F
+    F --> M[Map database fields]
+    M --> W[Write database]
+    W -->|Next batch| D
+```
 
-1. Ensure Redis is running and reachable before starting Docling. Start a local
-   Redis server when configured to manage it; otherwise connect to the configured
-   server. Record whether this run owns the server process.
-2. Start Docling as a background producer. It extracts PDFs, stores their images
-   and manifests in Redis, and publishes ready PDF jobs.
-3. Docling signals `filled` once at least five successfully processed PDFs are
-   waiting in this run's VLM queue. Count PDFs, not images or all historical
-   stream entries. Update the Docling state section and start the VLM consumer.
-   Docling continues processing the remaining PDFs concurrently.
-4. Docling signals `completed` when it has exhausted its input and finished all
-   queue publications. This also starts the VLM if fewer than five PDFs were
-   produced. If there are no ready PDFs, there is no VLM work to start.
-5. VLM workers consume queued PDFs and extract raw observations from their images.
-   Each image result becomes available to the main agent immediately; storage
-   does not wait for the entire PDF or Docling run to finish.
-6. The main agent queues each VLM result for separate formatting workers. A
-   configured text model resolves chart type and normalizes the output. Code
-   validates the result against its schema, with bounded model repair attempts
-   before recording unresolved or invalid output as an explicit failure.
-7. The database-fields step in the formatting worker maps the validated result
-   into a permanent record and validates required fields.
-   The writer commits that record and reports success or failure to the main
-   agent. Field mapping does not imply creating or altering database tables for
-   each image.
-8. Finish the run only after Docling has completed, the queues are drained, no
-   VLM/analysis/storage work is in flight, and every item has a recorded terminal
-   outcome. Distinguish clean completion from completion with item errors.
+## Setup and MainAgent decisions
 
-## State owned by the main agent
+The graph loads the approved run configuration and schema from the database,
+checks current hardware, and builds the MainAgent system prompt. Named setup
+nodes establish the routing maps, Redis queues, model resource plan and Docling
+producer. Each setup operation has an expandable MainAgent/tool subgraph:
+the selected call and its execution are separate checkpointable steps.
 
-| Section | Fields and meaning |
-| --- | --- |
-| Run | `run_id`, input/configuration, `status` (`starting`, `running`, `completed`, `completed_with_errors`, `failed`), timestamps, errors |
-| Redis | `status` (`starting`, `ready`, `failed`), connection reference, `managed_by_run` |
-| Docling | `status` (`idle`, `running`, `filled`, `completed`, `failed`), processed/queued/failed/no-assets PDF counts, `filled_at`, `completed_at` |
-| Queues | This run's waiting PDFs, in-flight PDFs/images, pending analysis results and writes |
-| VLM | `status` (`idle`, `running`, `draining`, `completed`, `failed`), `vlm_instances`, `requests_per_instance`, instance endpoints, active instances, processed/failed image counts |
-| Formatter | Status, text-model name/endpoint, `max_workers`, active workers, processed/failed image counts |
-| Analysis | Per-image result reference, resolved chart type, validation status and error |
-| Storage | Per-image field-mapping/write status, permanent record ID, stored/failed counts |
+The current MainAgent is the installed `qwen3-abliterated:latest`, Ollama ID
+`b07c3bcda724`. Local metadata reports Qwen3 architecture, 8.2B parameters,
+Q4_K_M and native tools. This is the installed model the user called
+`qwen3.8-abliterated`. Its reported 40,960-token model context is not an Ollama
+allocation setting; the endpoint must allocate enough context for the run schema
+and tool definitions.
 
-Keep image bytes and full result payloads outside graph state. State carries
-references and summaries, with per-item records keyed by run, document attempt,
-asset, and image ordinal. All queue work and counters must be scoped to the run.
+There are three VLMs and three formatters, with both thinking flags enabled.
+See [additional models](configuration/additional-models.md) for aliases, context
+settings and the unverified under-4-GB RAM requirement for the two added VLMs.
 
-`filled` is a one-time startup signal: the Docling worker remains active in this
-state until `completed`. A shrinking queue does not undo the signal or stop the
-VLM. `completed` means the producer has finished, not that the whole pipeline has
-finished or that every PDF succeeded. Preserve per-PDF outcomes separately.
+When VLM thinking is enabled, queues exist for every configured VLM and default
+formatter mappings cover every VLM that routing can choose. When formatter
+thinking is enabled, every configured formatter has a queue. Default mappings
+are starting choices, not restrictions on per-image reasoning.
 
-## Worker event contract
+Single-model stages route directly. The two thinking flags operate independently.
+An explicit `main_agent=None` runs setup deterministically and requires direct
+routing. The processing stages remain visible in either mode.
 
-Every event carries `event_id`, `run_id`, source, timestamp, and relevant document
-attempt/asset/image identifiers. The coordinator applies duplicate events only
-once so redelivery cannot double-count work.
+## Processing stages
 
-| Event | Coordinator action |
-| --- | --- |
-| `docling.pdf_queued` | Record the successfully published PDF and update waiting-work accounting |
-| `docling.pdf_finished` | Record an unqueued PDF's `no_assets` or `failed` outcome |
-| `docling.filled` | Latch startup readiness and start the VLM pool if it is not already started |
-| `docling.completed` | Mark the producer finished and release any remaining small batch |
-| `vlm.pdf_claimed` | Move the PDF's expected images from waiting to in-flight VLM work |
-| `vlm.image_completed` | Record the result reference and schedule chart analysis |
-| `analysis.completed` | Pass the resolved chart type and validated data to field mapping |
-| `db_fields.completed` | Schedule the permanent write |
-| `writer.committed` | Record the permanent ID and mark the image stored |
-| `worker.item_failed` | Record a terminal image error after worker-side retries are exhausted |
-| `worker.failed` | Record a stage-level failure; do not report successful run completion |
+Only the Docling producer and ownership lease run in the background.
+[src/agent/stages.py](src/agent/stages.py) contains the named graph nodes;
+[src/agent/stage_runtime.py](src/agent/stage_runtime.py) implements their queue
+and persistence operations. The active graph has no `coordinate_pipeline`,
+`dispatch_action` or general worker-event dispatch loop.
 
-Only publish a ready PDF after its manifest and accepted image data have been
-stored successfully. A PDF with no accepted images has a terminal no-assets
-outcome and does not contribute toward the five-PDF threshold.
+1. **start_docling** starts extraction and the run lease.
+2. **docling** waits for the initial manifest minimum, or a smaller final input,
+   then returns a bounded document batch.
+3. **main_agent_route_images** asks for one native `select_vlm_queue` call per
+   image, using caption, mentions, nearby text and the top three classifications.
+   **route_images_directly** uses the configured mapping without an LLM call.
+4. **vlm** enqueues that batch and runs the actual VLM requests, model groups and
+   retries. The node finishes after the batch's VLM work has settled.
+5. **main_agent_route_outputs** reads each saved VLM result and requests a native
+   `select_formatter_queue` decision.
+   **route_outputs_directly** applies the formatter mapping without an LLM call.
+6. **formatter** runs the actual formatter requests and retries using the run's
+   approved schema.
+7. **map_database_fields** validates and saves the relational field mapping.
+8. **write_database** releases settled documents from the extraction buffer and
+   commits eligible whole-document SQL batches.
+9. The graph returns to **docling** for another batch. An empty final batch goes
+   directly to **write_database** to flush the tail, then **finish_run** records
+   the outcome and closes owned resources.
 
-Queue claims must assign work to one consumer at a time. Preserve unfinished
-work for recovery; acknowledge a PDF job only after all its images have durable
-terminal outcomes. Writes must be idempotent for the same image attempt, so a
-retry after a commit cannot create duplicate permanent records. Unknown chart
-types or invalid output receive an explicit unresolved/failed outcome rather
-than an invented field mapping.
+Docling can continue filling the buffer during downstream work. VLM and formatter
+stages execute sequentially for each batch; compatible models within a stage
+can run concurrently. This provides visible stage boundaries and batches work
+to limit model switching.
 
-## VLM instances and formatting workers
+The default initial minimum is 20 documents and the maximum active buffer is
+50. The local fixture uses a minimum of 1. After the initial gate opens, later
+batches can start with any ready documents. Mapped documents waiting for a SQL
+batch no longer occupy the extraction buffer.
 
-`vlm_instances` controls independently running vision-model instances;
-`requests_per_instance` limits concurrent requests to each instance. Both default
-to one. Instances claim distinct Redis jobs, subject to memory/compute capacity.
-Automatic capacity detection and adaptive scaling remain future work. Repeated
-readiness signals reuse the existing pool.
+## Queues, resources and failures
 
-Formatting workers use a separate configurable text-model endpoint and their
-own worker limit. They may share one loaded text model. The coordinator queues
-work without running inference inline. Bounded result/write queues provide
-backpressure. Preserve raw output and never invent values to satisfy a schema.
-Code validation checks structure; it cannot establish extraction accuracy.
-The formatter must account for each extracted observation as mapped or unmapped,
-retaining source references and reasons in `unmapped_observations`. The writer
-must permanently save the original extraction and unresolved observations along
-with the formatted record. This guards against formatting losses, not omissions
-the VLM made while reading the image.
+Redis queues are scoped by run, stage and model. Only a model's own consumers
+read its queue. Requests per model and model-batch turns remain bounded.
+Workers first recover their pending jobs. Saved results and routing decisions
+are reused after interruption instead of repeating successful inference.
 
-## Current implementation boundaries
+MainAgent proposes model groups and their order. Python requires exact queue
+coverage and validates managed-model RAM/VRAM budgets, subtracting the configured
+reserve. Capacity is checked again before managed groups launch.
+`serving="managed"` uses the configured argument-list launch command and stops
+only owned process groups. `serving="external"`, including the local Ollama
+models, delegates actual memory allocation, loading and offload to that server.
+The shared Ollama endpoint does not enforce a per-model 4 GB RAM cap.
 
-The main agent is split into four files:
+VLM output is free-form. Formatters produce schema-validated data and
+`unmapped_observations`. Chat and NuExtract adapters remain available; NuExtract
+supports the schema subset documented in [schemas/README.md](schemas/README.md).
 
-- `src/agent/state.py`: run state, worker state sections, per-image progress,
-  and the worker event envelope.
-- `src/agent/hooks.py`: named asynchronous worker/lifecycle adapters and a
-  completion predicate, with pseudocode for unfinished external operations.
-- `src/agent/coordinator.py`: configuration checks, atomic event validation,
-  duplicate-event handling, per-document/image progress, pending action planning,
-  and completion checks.
-- `src/agent/graph.py`: Redis readiness → background Docling launch → event
-  processing → action dispatch → event acknowledgment, repeating until finalization.
-  Each event and each action is a separate graph step.
+The retry limit counts additional attempts independently for VLM and formatting.
+A formatter retry reuses saved VLM output. Workers retain raw output, invalid
+responses and failure evidence in Redis. Routing rejects unavailable models and
+allows at most three attempts to correct invalid native tool decisions.
 
-The graph compiles for inspection. Invocation raises `NotImplementedError` at
-the first unwired hook; it does not start services or claim successful work.
+With `approve_with_fails=False`, a terminal image failure blocks its document's
+SQL write. With `"omit"`, failed image identities are stored with empty fields
+alongside successful images. No invented measurements are inserted.
 
-`src/redis/state.py` provides image/manifest storage and a `pdf:ready` stream,
-and Docling calls these helpers. It does not yet provide the run-scoped readiness
-events consumed by the coordinator. `src/vlm/vlm.py` provides a single-image model call,
-not a queue consumer. It now returns raw text without a `response_format` or
-schema argument. Its prompt asks for visible observations and uncertainties
-without limiting the chart type to a fixed list. Persisting that raw text and
-implementing model-backed formatting remain future work.
-`src/schema_format.py` defines chart schemas and initial
-Docling-based routing; post-VLM analysis must reconcile the final chart type
-with those schemas. `src/db/db.py` is empty. Redis lifecycle management, the
-consumer pool, field mapper, durable writer, and durable event transport remain
-to be implemented.
+The writer commits at the configured document batch size, capped at 50; the
+local fixture uses 1. It flushes a smaller tail only after production and upstream
+processing finish. SQL writes are atomic per document and replay is idempotent.
+Progress reflects actual saved results and confirmed writes. Fatal exceptions
+stop at their named graph stage and leave the run incomplete for recovery.
 
-## Adapter and recovery requirements
+## Running and recovery
 
-`docling.pdf_queued` must carry `document_attempt_id` and a nonempty `image_keys`
-list identifying every accepted image. Use stable, run-unique keys incorporating
-the document attempt, asset ID, and image ordinal. Image events carry the matching
-`document_attempt_id` and `image_key`. Producer completion must follow all PDF
-notifications; a PDF claim notification must precede its image results.
+Complete [configuration/README.md](configuration/README.md), configure
+`DATABASE_URL`, `REDIS_URL` and model endpoints, and apply SQL migrations.
+Then create a fresh run:
 
-`analysis.completed` requires the normalized payload reference, resolved chart
-type, and `unmapped_observations_ref` (pointing to an empty list when all findings
-were mapped). `writer.committed` requires the permanent `record_id`. The writer
-must emit it only after raw, formatted, and unmapped data have been committed.
-The coordinator validates the event envelope and sequence; payload validation
-is still the responsibility of the future formatting adapter.
+```bash
+uv run python -m agent /path/to/pdfs
+```
 
-Adapters return typed state-section updates and must return promptly after
-launching/scheduling. They must not mutate input state or overwrite coordinator
-bookkeeping. Calls may be replayed after a crash: use `run_id` for pool launch
-idempotency and `(run_id, event_id, action_name)` for scheduled work. A PDF is
-acknowledged only after all its images are stored or terminally failed, and the
-acknowledgment adapter must persist terminal errors before releasing the claim.
+The CLI snapshots current `CONFIG` into a new run. `--run-id ID` accepts an
+approved, unstarted run; existing runs retain their saved model configuration.
 
-Use `build_graph(checkpointer=...)` with a durable checkpointer, a stable
-`configurable.thread_id`, and `durability="sync"` when invoking for durable
-recovery. Resume an interrupted run with `ainvoke(None, config, durability="sync")`.
-The default exported graph does not configure persistence. Set `recursion_limit`
-for the expected event volume: each event takes multiple graph steps. The current
-per-item state and processed-event list grow with the run; large-run compaction
-is not implemented.
+For recovery, use `build_graph(checkpointer=...)` with a durable checkpointer,
+stable `configurable.thread_id`, `durability="sync"` and sufficient
+`recursion_limit`. Resume the same checkpoint with `ainvoke(None, config)`.
+Stop the previous runtime before resuming in a replacement process. The CLI
+cleans up owned workers on exit, but still has no durable checkpointer by default.
 
-Adapter exceptions leave the graph at the failed step for inspection/resume;
-they do not masquerade as successful worker events. Automatic retry, cancellation
-cleanup, and worker-death detection are not implemented. Explicit `worker.failed`
-events route to cleanup and finalization with run status `failed`.
+**Use a new run/thread for this graph topology.** Checkpoints from the previous
+event-coordinator graph are not migrated and require the corresponding old code.
+Redis persistence and durable checkpoints are both necessary for host-failure
+recovery. Older event/runtime helpers remain for compatibility, but are not
+nodes or background routing/writing workers in this graph.
 
-Focused tests cover readiness thresholds, small/empty runs, event ordering,
-duplicates, image failures, raw/unmapped reference retention, and resuming a
-failed action with an in-memory checkpointer and fake worker adapters. They do
-not start Redis, load models, or write a real database.
+The graph definition was exported without executing the pipeline. Tests and
+live inference remain paused at the user's request. The stage refactor and new
+model RAM/accuracy therefore remain unverified end to end.

@@ -1,0 +1,54 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	prepare_agent(prepare_agent)
+	initialize(initialize)
+	match_vlm_models(match_vlm_models)
+	match_formatter_models(match_formatter_models)
+	ensure_redis(ensure_redis)
+	create_vlm_queues(create_vlm_queues)
+	create_formatter_queues(create_formatter_queues)
+	schedule_models(schedule_models)
+	start_docling(start_docling)
+	docling(docling)
+	main_agent_route_images(main_agent_route_images)
+	route_images_directly(route_images_directly)
+	vlm(vlm)
+	main_agent_route_outputs(main_agent_route_outputs)
+	route_outputs_directly(route_outputs_directly)
+	formatter(formatter)
+	map_database_fields(map_database_fields)
+	write_database(write_database)
+	finish_run(finish_run)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> prepare_agent;
+	create_formatter_queues --> schedule_models;
+	create_vlm_queues --> create_formatter_queues;
+	docling -. &nbsp;thinking_enabled&nbsp; .-> main_agent_route_images;
+	docling -. &nbsp;direct&nbsp; .-> route_images_directly;
+	docling -. &nbsp;no_more_images&nbsp; .-> write_database;
+	ensure_redis --> create_vlm_queues;
+	formatter --> map_database_fields;
+	initialize --> match_vlm_models;
+	main_agent_route_images --> vlm;
+	main_agent_route_outputs --> formatter;
+	map_database_fields --> write_database;
+	match_formatter_models --> ensure_redis;
+	match_vlm_models --> match_formatter_models;
+	prepare_agent --> initialize;
+	route_images_directly --> vlm;
+	route_outputs_directly --> formatter;
+	schedule_models --> start_docling;
+	start_docling --> docling;
+	vlm -. &nbsp;thinking_enabled&nbsp; .-> main_agent_route_outputs;
+	vlm -. &nbsp;direct&nbsp; .-> route_outputs_directly;
+	write_database -. &nbsp;next_batch&nbsp; .-> docling;
+	write_database -. &nbsp;finished&nbsp; .-> finish_run;
+	finish_run --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

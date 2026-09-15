@@ -1,0 +1,25 @@
+The image is a line chart showing observed values and planned targets over the years 2020 to 2025. The y-axis represents an index, with the base year set as 2020. The x-axis shows the years from 2020 to 2025.
+
+- **Legend**: 
+  - Blue circles represent "Observed" values.
+  - Green squares represent "Target" values.
+
+### Observations:
+
+#### Observed Values:
+- Year: 2020, Index: 42
+- Year: 2021, Index: 48
+- Year: 2022, Index: 57
+- Year: 2023, Index: 55 (The observed value dips below the target)
+- Year: 2024, Index: 68
+- Year: 2025, Index: 76
+
+#### Target Values:
+- Year: 2020, Index: 40
+- Year: 2021, Index: 45 (The target is slightly higher than the observed value)
+- Year: 2022, Index: 50
+- Year: 2023, Index: 57
+- Year: 2024, Index: 68
+- Year: 2025, Index: 73
+
+The chart shows that the observed values generally follow a trend similar to the target values but with some fluctuations. The observed index surpasses the target in 2024 and continues to rise above it by 2025.
