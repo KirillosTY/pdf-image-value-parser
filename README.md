@@ -110,6 +110,3 @@ test datasets belong under `testing_data/`. Generated images and downloaded PDFs
 are ignored by Git.
 
 
-## Process structure
-![Uploading image.png…](Current langgraph process Structure)
-
