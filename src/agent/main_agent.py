@@ -58,7 +58,7 @@ async def decide(state: State, *, tool_name: str | None = None) -> dict:
             "agent_messages": [*state.agent_messages, message]}
 
 
-async def act(state: State) -> dict:
+async def act(state: State, *, tool_name: str | None = None) -> dict:
     """Execute the saved call and feed its actual result back to the MainAgent."""
     call = state.agent_tool_call
     if call is None:
@@ -73,6 +73,8 @@ async def act(state: State) -> dict:
         error = ToolInputError(f"Tool arguments must be valid JSON: {exc}")
     else:
         error = None
+    if error is None and tool_name is not None and function["name"] != tool_name:
+        error = ToolInputError(f"This graph step requires the {tool_name} tool")
     update = {}
     if error is None:
         try:
@@ -116,13 +118,16 @@ def build_tool_step(tool_name: str, fallback):
     async def select(state):
         return await decide(state, tool_name=tool_name)
 
+    async def execute(state):
+        return await act(state, tool_name=tool_name)
+
     def after_execution(state):
         return "main_agent" if state.agent_input_errors else END
 
     return (
         StateGraph(State)
         .add_node("main_agent", select)
-        .add_node("main_agent_tool", act)
+        .add_node("main_agent_tool", execute)
         .add_node("configured_operation", fallback)
         .add_conditional_edges(
             START,

@@ -26,6 +26,8 @@ checks current hardware, and builds the MainAgent system prompt. Named setup
 nodes establish the routing maps, Redis queues, model resource plan and Docling
 producer. Each setup operation has an expandable MainAgent/tool subgraph:
 the selected call and its execution are separate checkpointable steps.
+Each step accepts only its own named tool, even if another setup tool's
+prerequisites also happen to be satisfied.
 
 The current MainAgent is the installed `qwen3-abliterated:latest`, Ollama ID
 `b07c3bcda724`. Local metadata reports Qwen3 architecture, 8.2B parameters,
@@ -116,6 +118,8 @@ alongside successful images. No invented measurements are inserted.
 The writer commits at the configured document batch size, capped at 50; the
 local fixture uses 1. It flushes a smaller tail only after production and upstream
 processing finish. SQL writes are atomic per document and replay is idempotent.
+Each image's graph state exposes `vlm_model` and `formatter_model`, so Studio
+shows the selected routes alongside its result references and processing stage.
 Progress reflects actual saved results and confirmed writes. Fatal exceptions
 stop at their named graph stage and leave the run incomplete for recovery.
 
