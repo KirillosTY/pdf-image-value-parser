@@ -108,3 +108,8 @@ are available locally in `testing_data/pdffigures2/`; `sources.json` records the
 URLs and hashes. These are extraction test samples, not training data. Downloaded
 test datasets belong under `testing_data/`. Generated images and downloaded PDFs
 are ignored by Git.
+
+
+## Process structure
+![Uploading image.png…](Current langgraph process Structure)
+
