@@ -48,6 +48,10 @@ def compatible_groups(
     groups, usage = [], []
     for key in sorted(model_keys):
         costs = cost(key)
+        if config.get("batch_processing"):
+            groups.append([key])
+            usage.append(costs)
+            continue
         for group, used in zip(groups, usage):
             if all(
                 current + needed <= available

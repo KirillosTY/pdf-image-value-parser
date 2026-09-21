@@ -1,0 +1,34 @@
+[
+  {
+    "model": "parser-qwen3-vl:2b",
+    "started": "2026-09-16T16:49:27.136795+00:00",
+    "status": "failed",
+    "error": "ValueError: VLM did not return complete observations",
+    "seconds": 100.274,
+    "ended": "2026-09-16T16:51:07.410460+00:00"
+  },
+  {
+    "model": "parser-granite-vision:2b",
+    "started": "2026-09-16T16:51:07.410630+00:00",
+    "status": "failed",
+    "error": "BadRequestError: Error code: 400 - {'error': {'message': '{\"error\":{\"code\":400,\"message\":\"request (6989 tokens) exceeds the available context size (4096 tokens), try increasing it\",\"type\":\"exceed_context_size_error\",\"n_prompt_tokens\":6989,\"n_ctx\":4096}}', 'type': 'invalid_request_error', 'param': None, 'code': None}}",
+    "seconds": 4.265,
+    "ended": "2026-09-16T16:51:11.675896+00:00"
+  },
+  {
+    "model": "parser-qwen-formatter:3b",
+    "started": "2026-09-16T16:51:11.676123+00:00",
+    "measurements": 10,
+    "status": "completed",
+    "seconds": 13.75,
+    "ended": "2026-09-16T16:51:25.426253+00:00"
+  },
+  {
+    "model": "parser-llama-formatter:3b",
+    "started": "2026-09-16T16:51:25.426372+00:00",
+    "status": "failed",
+    "error": "APIConnectionError: Connection error.",
+    "seconds": 45.445,
+    "ended": "2026-09-16T16:52:10.871194+00:00"
+  }
+]

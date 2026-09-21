@@ -38,11 +38,13 @@ async def match_vlm_models(state: State) -> dict:
         model_key = next(iter(vlms))
         routes = {chart_type: model_key for chart_type in chart_types}
 
-    elif not config["vlm_think_sorting"]:
+    elif not config["think_sorting"] or config.get("batch_processing"):
+        # Batch thinking happens after Docling. These are only startup defaults;
+        # all candidates still get queues and per-image choices are made later.
         routes = {
             chart_type: config["chart_matcher"].get(
                 chart_type,
-                config["fallback_vlm"],
+                config["fallback_vlm"] or sorted(vlms)[0],
             )
             for chart_type in chart_types
         }
@@ -117,17 +119,17 @@ async def match_formatter_models(state: State) -> dict:
         available_vlms,
     )
 
-    selected_vlms = available_vlms if config["vlm_think_sorting"] else set(state.VLM_INPUT.values())
+    selected_vlms = available_vlms if config["think_sorting"] else set(state.VLM_INPUT.values())
 
     if len(formatters) == 1:
         formatter_key = next(iter(formatters))
         routes = {vlm_key: formatter_key for vlm_key in sorted(selected_vlms)}
 
-    elif not config["formatter_think_sorting"]:
+    elif not config["think_sorting"] or config.get("batch_processing"):
         routes = {
             vlm_key: config["format_matcher"].get(
                 vlm_key,
-                config["fallback_formatter"],
+                config["fallback_formatter"] or sorted(formatters)[0],
             )
             for vlm_key in sorted(selected_vlms)
         }
@@ -166,7 +168,7 @@ async def match_formatter_models(state: State) -> dict:
 async def route_image(state: State, image: dict, context: dict) -> str:
     """Route one crop using its caption, mentions, nearby text and predictions."""
     allowed = set(state.vlm_queues)
-    if not state.config["vlm_think_sorting"] or len(allowed) == 1:
+    if not state.config["think_sorting"] or len(allowed) == 1:
         return state.VLM_INPUT.get(image.get("class_name"), state.VLM_INPUT["unknown"])
     return await choose_model_with_tool(
         state, "select_vlm_queue", allowed,
@@ -189,7 +191,7 @@ async def route_result(
 ) -> str:
     """Choose a formatter for one saved result, bounded by prepared queues."""
     allowed = set(state.formatter_queues)
-    if not state.config["formatter_think_sorting"] or len(allowed) == 1:
+    if not state.config["think_sorting"] or len(allowed) == 1:
         return state.FORMATTER_INPUT[vlm_key]
     return await choose_model_with_tool(
         state, "select_formatter_queue", allowed,

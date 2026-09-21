@@ -1,0 +1,169 @@
+Traceback (most recent call last):
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpx2/_transports/default.py", line 98, in map_httpcore_exceptions
+    yield
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpx2/_transports/default.py", line 388, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_async/connection_pool.py", line 242, in handle_async_request
+    raise exc from None
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_async/connection_pool.py", line 224, in handle_async_request
+    response = await connection.handle_async_request(pool_request.request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_async/connection.py", line 96, in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_async/http11.py", line 125, in handle_async_request
+    raise exc
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_async/http11.py", line 97, in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_async/http11.py", line 167, in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_async/http11.py", line 200, in _receive_event
+    data = await self._network_stream.read(self.READ_NUM_BYTES, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_backends/anyio.py", line 34, in read
+    with map_exceptions(exc_map):
+         ~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/kirilllos/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpcore2/_exceptions.py", line 17, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore2.ReadTimeout
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/_base_client.py", line 1699, in request
+    response = await self._send_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/_client.py", line 1353, in _send_request
+    response = await self._send_with_auth_retry(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/_client.py", line 1332, in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/_base_client.py", line 1618, in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpx2/_client.py", line 1818, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpx2/_client.py", line 1846, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpx2/_client.py", line 1881, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpx2/_client.py", line 1915, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpx2/_transports/default.py", line 387, in handle_async_request
+    with map_httpcore_exceptions():
+         ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/kirilllos/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/httpx2/_transports/default.py", line 115, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx2.ReadTimeout
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/runtime.py", line 164, in guard
+    await method()
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/stage_runtime.py", line 95, in route
+    await self.save_route(state, key, image_key, stage, field, queues)
+  File "/home/kirilllos/projects/AI/parser/parser/tmp/pdfs/run_live_pipeline.py", line 94, in wrapped
+    result = await function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/stage_runtime.py", line 113, in save_route
+    await route_image(state, image, context) if stage == "vlm"
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/routing.py", line 171, in route_image
+    return await choose_model_with_tool(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<12 lines>...
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/model.py", line 116, in choose_model_with_tool
+    message = await ask_main_agent_tool(request_state, [spec], context)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/tmp/pdfs/run_live_pipeline.py", line 94, in wrapped
+    result = await function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/model.py", line 85, in ask_main_agent_tool
+    response = await client.chat.completions.create(**request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/resources/chat/completions/completions.py", line 2931, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+    ...<55 lines>...
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/_base_client.py", line 1979, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/_base_client.py", line 1717, in request
+    raise APITimeoutError(request=request) from err
+openai.APITimeoutError: Request timed out.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/kirilllos/projects/AI/parser/parser/tmp/pdfs/run_live_pipeline.py", line 148, in run
+    result = await run_pipeline(str(input_path), run_id=run_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/__main__.py", line 26, in run_pipeline
+    return await build_graph().ainvoke(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        {"run_id": run_id, "input_path": input_path}, {"recursion_limit": 1_000_000}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/main.py", line 3184, in ainvoke
+    async for chunk in self.astream(
+    ...<29 lines>...
+            chunks.append(chunk)
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/main.py", line 2997, in astream
+    async for _ in runner.atick(
+    ...<13 lines>...
+            yield o
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/_runner.py", line 304, in atick
+    await arun_with_retry(
+    ...<15 lines>...
+    )
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/_retry.py", line 163, in arun_with_retry
+    return await task.proc.ainvoke(task.input, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/_internal/_runnable.py", line 705, in ainvoke
+    input = await asyncio.create_task(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        step.ainvoke(input, config, **kwargs), context=context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/_internal/_runnable.py", line 473, in ainvoke
+    ret = await self.afunc(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/stages.py", line 33, in await_ready_work
+    await runtime.await_ready_work()
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/stage_runtime.py", line 65, in await_ready_work
+    self.check_workers()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/stage_runtime.py", line 39, in check_workers
+    raise RuntimeError("A pipeline worker failed") from self.failure
+RuntimeError: A pipeline worker failed
+During task with name 'await_ready_work' and id '64d340d2-bf1f-81c3-7333-9c41c7d183c6'

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from copy import deepcopy
 from typing import Any
 
@@ -99,6 +100,22 @@ def _unique_object(pairs: list[tuple[str, Any]]) -> dict:
     return result
 
 
+def parse_formatter_json(text: str) -> dict:
+    """Accept bare JSON or one enclosing code fence; never repair data."""
+    candidate = text.strip()
+    fenced = re.fullmatch(r"```(?:json)?\s*\n(.*?)\n```", candidate, flags=re.DOTALL | re.IGNORECASE)
+    if fenced:
+        candidate = fenced.group(1).strip()
+    result = json.loads(
+        candidate, parse_constant=_reject_constant, object_pairs_hook=_unique_object,
+    )
+    # Also catches overflow such as 1e999 parsed into float('inf').
+    json.dumps(result, allow_nan=False)
+    if not isinstance(result, dict):
+        raise ValueError("Formatter response must be a JSON object")
+    return result
+
+
 class NuExtractFormatter:
     """Call a separately served, text-input NuExtract model."""
 
@@ -182,11 +199,7 @@ class NuExtractFormatter:
                 raise ValueError(
                     f"Formatter did not finish normally: {choice.finish_reason}"
                 )
-            result = json.loads(
-                text, parse_constant=_reject_constant, object_pairs_hook=_unique_object
-            )
-            # Also catches overflow such as 1e999 parsed into float('inf').
-            json.dumps(result, allow_nan=False)
+            result = parse_formatter_json(text)
             if not isinstance(result, dict) or set(result) != {
                 "data",
                 "unmapped_observations",

@@ -22,7 +22,7 @@ quality remains unverified. Both receive the complete nullable JSON Schema.
 
 The original chart reader, formatter and installed Qwen3 abliterated MainAgent
 remain configured. There are now three models available for each worker stage.
-Both thinking flags are enabled. MainAgent chooses default routes, then makes
+`think_sorting=True` enables one shared MainAgent for both routing stages. MainAgent chooses default routes, then makes
 per-image/per-result decisions in the visible routing nodes. All configured
 candidates have queues when thinking is enabled, so a default route does not
 prevent selecting another model for a specific image. Existing runs keep their

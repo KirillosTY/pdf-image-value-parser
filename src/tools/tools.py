@@ -54,7 +54,7 @@ def available_tools(state: State) -> list[dict]:
     if not state.VLM_INPUT:
         charts = list(dict.fromkeys([*config["docling_charts"], "unknown"]))
         fixed = None
-        if not config["vlm_think_sorting"]:
+        if not config["think_sorting"]:
             fixed = {chart: config["chart_matcher"].get(chart, config["fallback_vlm"])
                      for chart in charts}
         schema = _routes(charts, vlms, fixed)
@@ -63,9 +63,9 @@ def available_tools(state: State) -> list[dict]:
         return [_tool("set_vlm_routes", "Choose the best VLM for every chart type. Respect fixed routes.",
                       {"routes": schema})]
     if not state.FORMATTER_INPUT:
-        selected = sorted(vlms if config["vlm_think_sorting"] else set(state.VLM_INPUT.values()))
+        selected = sorted(vlms if config["think_sorting"] else set(state.VLM_INPUT.values()))
         fixed = None
-        if not config["formatter_think_sorting"]:
+        if not config["think_sorting"]:
             fixed = {key: config["format_matcher"].get(key, config["fallback_formatter"])
                      for key in selected}
         return [_tool("set_formatter_routes", "Match each selected VLM's output to a formatter and the approved schema.",
@@ -115,15 +115,23 @@ def observation(state: State) -> dict:
         "vlm_queues": state.vlm_queues, "formatter_queues": state.formatter_queues,
         "resource_plan": state.resource_plan, "queues": asdict(state.queues),
         "docling_status": state.docling.status,
+        "redis_status": state.redis.status,
+        "startup_turns": state.startup_turns,
+        "startup_attempts": state.startup_attempts,
+        "startup_last_error": state.startup_last_error,
+        "startup_diagnostics": state.startup_diagnostics,
         "pending_actions": state.pending_actions,
         "current_event": asdict(state.current_event) if state.current_event else None,
         "recent_errors": state.errors[-3:],
     }
     if state.vlm_queues and state.formatter_queues and not state.resource_plan:
-        result["suggested_resource_groups"] = compatible_groups(
-            state.config, state.current_hardware,
-            set(state.vlm_queues) | set(state.formatter_queues),
-        )
+        try:
+            result["suggested_resource_groups"] = compatible_groups(
+                state.config, state.current_hardware,
+                set(state.vlm_queues) | set(state.formatter_queues),
+            )
+        except ValueError as exc:
+            result["resource_planning_error"] = str(exc)
     return result
 
 
@@ -152,7 +160,7 @@ async def execute_tool(state: State, name: str, arguments: dict) -> dict:
     if name in {"create_vlm_queues", "create_formatter_queues"}:
         return await getattr(queues, name)(state)
     if name in {"ensure_redis", "start_docling", "finish_run"}:
-        # Share lifecycle behavior with the explicitly agent-free graph.
+        # Keep legacy tool callers on the same lifecycle adapters as startup.
         from agent.graph import ensure_redis, finish_run, start_docling
 
         return await {"ensure_redis": ensure_redis, "start_docling": start_docling,

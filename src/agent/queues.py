@@ -15,7 +15,7 @@ async def create_vlm_queues(state: State) -> dict:
         raise ValueError("A run and VLM_INPUT mapping are required")
 
     selected = set(state.VLM_INPUT.values())
-    if state.config.get("vlm_think_sorting"):
+    if state.config.get("think_sorting"):
         selected = {key for key, model in state.config["models"].items() if "vlm" in model["roles"]}
 
     async with async_redis_client() as client:
@@ -40,7 +40,7 @@ async def create_formatter_queues(state: State) -> dict:
         )
 
     selected = set(state.FORMATTER_INPUT.values())
-    if state.config.get("formatter_think_sorting"):
+    if state.config.get("think_sorting"):
         selected = {key for key, model in state.config["models"].items() if "formatter" in model["roles"]}
 
     async with async_redis_client() as client:

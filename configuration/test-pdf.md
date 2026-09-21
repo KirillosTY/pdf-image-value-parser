@@ -6,14 +6,16 @@ for measured results; the historical proposal remains in `proposed-test-pdf/`.
 
 The baseline described below has since been expanded with two more VLMs and two
 more formatters; [additional-models.md](additional-models.md) describes the
-current registry. Both routing-thinking flags are now enabled. Historical
+current registry. `think_sorting=True` now controls both routes through one MainAgent. Historical
 fixture results do not evaluate these additions.
 
 ## Configuration files
 
 | Prepared file | Destination / purpose |
 | --- | --- |
-| [config.py](../src/config.py) | Complete proposed replacement for `src/config.py`; dataclasses unchanged |
+| [run.toml](run.toml) | Current workload, run switches, schema selection and policies |
+| [models.toml](models.toml) | Current model registry, routing and memory settings |
+| [config.py](../src/config.py) | Defaults, configuration validation and setup flags |
 | [bundle.json](../schemas/test-pdf/bundle.json) | `schemas/test-pdf/bundle.json` |
 | [vlm.Modelfile](proposed-test-pdf/vlm.Modelfile) | Local alias `parser-chart-vlm:7b` from installed `qwen2.5vl:7b` |
 | [formatter.Modelfile](proposed-test-pdf/formatter.Modelfile) | Local alias `parser-chart-formatter:7b` from installed `qwen2.5:7b` |
@@ -24,11 +26,13 @@ Both models use the running local Ollama OpenAI-compatible endpoint. The VLM
 accepts chart images and returns unrestricted text. The text formatter accepts
 that text with the schema using the existing `chat` adapter.
 
-The MainAgent now uses the separately installed `qwen3-abliterated:latest`
-(ID `b07c3bcda724`) at the same endpoint, as requested by the user. Local metadata
+The MainAgent now uses the separately installed `qwen3-abliterated:latest` weights
+(ID `b07c3bcda724`) through `parser-main-agent:latest` at the same endpoint.
+The alias sets `num_ctx=16384`; the base alias's 4096-token allocation rejected
+the full startup prompt during the 2026-09-16 live check. Local metadata
 reports 8.2B parameters, Q4_K_M, a 40,960-token model context and native tools.
 The user referred to this installed model as `qwen3.8-abliterated`; the exact
-Ollama model ID is used in `src/config.py`. One model per stage disables routing
+Ollama model ID is used in `configuration/models.toml`. One model per stage disables routing
 reasoning but leaves the tool-calling orchestrator active. No new weights were
 downloaded. Context allocation and real tool execution remain unverified because
 the user paused testing. Previous fixture results predate this MainAgent change.

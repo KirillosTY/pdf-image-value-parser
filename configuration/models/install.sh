@@ -10,3 +10,5 @@ ollama create parser-qwen3-vl:2b -f configuration/models/qwen3-vl-2b.Modelfile
 ollama create parser-granite-vision:2b -f configuration/models/granite-vision-2b.Modelfile
 ollama create parser-qwen-formatter:3b -f configuration/models/qwen-formatter-3b.Modelfile
 ollama create parser-llama-formatter:3b -f configuration/models/llama-formatter-3b.Modelfile
+# Reuse the user's installed MainAgent weights with enough server context.
+ollama create parser-main-agent:latest -f configuration/models/main-agent.Modelfile

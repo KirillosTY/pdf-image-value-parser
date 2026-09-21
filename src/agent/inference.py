@@ -9,9 +9,8 @@ from parser.src.formatter.model import (
     FORMAT_INSTRUCTIONS,
     FormattingError,
     NuExtractFormatter,
-    _reject_constant,
-    _unique_object,
     normalize_fields,
+    parse_formatter_json,
 )
 from parser.src.vlm.type_format import DEFAULT_PROMT
 
@@ -73,11 +72,30 @@ async def format_result(
                 )
 
         return await asyncio.to_thread(invoke)
+    response_mode = model.get("formatter_response_format", "text")
+    envelope = {
+        "type": "object",
+        "properties": {
+            "data": schema,
+            "unmapped_observations": {"type": "array", "items": {"type": "string"}},
+        },
+        "required": ["data", "unmapped_observations"],
+        "additionalProperties": False,
+    }
+    response_options = {}
+    if response_mode == "json_schema":
+        response_options["response_format"] = {
+            "type": "json_schema",
+            "json_schema": {"name": "formatted_observations", "schema": envelope},
+        }
+    elif response_mode == "json_object":
+        response_options["response_format"] = {"type": "json_object"}
     async with AsyncOpenAI(**endpoint_options(model)) as client:
         response = await client.chat.completions.create(
             model=model["model_id"],
             temperature=0,
             max_tokens=model.get("max_output_tokens") or 16384,
+            **response_options,
             messages=[
                 {
                     "role": "system",
@@ -104,10 +122,7 @@ async def format_result(
     try:
         if choice.finish_reason != "stop":
             raise ValueError("Formatter response was truncated")
-        result = json.loads(
-            text, parse_constant=_reject_constant, object_pairs_hook=_unique_object
-        )
-        json.dumps(result, allow_nan=False)
+        result = parse_formatter_json(text)
         if not isinstance(result, dict) or set(result) != {
             "data",
             "unmapped_observations",

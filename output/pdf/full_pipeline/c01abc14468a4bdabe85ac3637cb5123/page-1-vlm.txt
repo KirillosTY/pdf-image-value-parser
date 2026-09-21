@@ -1,0 +1,17 @@
+The image is a grouped bar chart showing revenue (in thousand USD) for two regions, North and South, over five months: January to May. The x-axis represents the months with categories labeled as Jan, Feb, Mar, Apr, and May. The y-axis indicates revenue in thousand USD.
+
+- **North**:
+  - January: 120
+  - February: 150
+  - March: 135
+  - April: 180
+  - May: 210
+
+- **South**:
+  - January: 95
+  - February: 125
+  - March: 145
+  - April: 155
+  - May: 190
+
+The chart uses blue bars for the North and orange bars for the South. The revenue values are clearly marked on top of each bar, with no additional annotations or error bars visible in this image.

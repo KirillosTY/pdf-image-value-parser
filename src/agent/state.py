@@ -114,10 +114,11 @@ class State:
     FORMATTER_INPUT: dict[str, str] = field(default_factory=dict)
     vlm_queues: dict[str, str] = field(default_factory=dict)
     formatter_queues: dict[str, str] = field(default_factory=dict)
-    fill_threshold: int = 20
+    fill_threshold: int = 1
     resource_plan: list[list[str]] = field(default_factory=list)
     graph_managed_stages: bool = False
-    manifest_batch: list[str] = field(default_factory=list)
+    active_manifests: list[str] = field(default_factory=list)
+    pipeline_done: bool = False
     redis: RedisState = field(default_factory=RedisState)
     docling: DoclingState = field(default_factory=DoclingState)
     queues: QueueState = field(default_factory=QueueState)
@@ -131,6 +132,10 @@ class State:
     agent_messages: list[dict[str, Any]] = field(default_factory=list)
     agent_tool_call: dict[str, Any] | None = None
     agent_input_errors: int = 0
+    startup_turns: int = 0
+    startup_attempts: dict[str, int] = field(default_factory=dict)
+    startup_last_error: dict[str, Any] | None = None
+    startup_diagnostics: dict[str, Any] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:

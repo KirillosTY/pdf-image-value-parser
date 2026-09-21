@@ -1,0 +1,301 @@
+{
+  "data": {
+    "measurements": [
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "North",
+        "category": "Jan",
+        "row_label": null,
+        "x": 0,
+        "y": 120,
+        "value": 120,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "North",
+        "category": "Feb",
+        "row_label": null,
+        "x": 1,
+        "y": 150,
+        "value": 150,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "North",
+        "category": "Mar",
+        "row_label": null,
+        "x": 2,
+        "y": 135,
+        "value": 135,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "North",
+        "category": "Apr",
+        "row_label": null,
+        "x": 3,
+        "y": 180,
+        "value": 180,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "North",
+        "category": "May",
+        "row_label": null,
+        "x": 4,
+        "y": 210,
+        "value": 210,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "South",
+        "category": "Jan",
+        "row_label": null,
+        "x": 0,
+        "y": 95,
+        "value": 95,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "South",
+        "category": "Feb",
+        "row_label": null,
+        "x": 1,
+        "y": 125,
+        "value": 125,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "South",
+        "category": "Mar",
+        "row_label": null,
+        "x": 2,
+        "y": 145,
+        "value": 145,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "South",
+        "category": "Apr",
+        "row_label": null,
+        "x": 3,
+        "y": 155,
+        "value": 155,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      },
+      {
+        "panel": "1",
+        "chart_type": "bar_chart",
+        "title": "Revenue (in thousand USD) for North and South over five months",
+        "series": "South",
+        "category": "May",
+        "row_label": null,
+        "x": 4,
+        "y": 190,
+        "value": 190,
+        "statistic": null,
+        "unit": "thousand USD",
+        "reading": "estimated",
+        "notes": null
+      }
+    ]
+  },
+  "unmapped_observations": [],
+  "model": "parser-qwen-formatter:3b",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "measurements"
+    ],
+    "properties": {
+      "measurements": {
+        "type": "array",
+        "description": "One record per visible value, scatter point, or box statistic, across every panel. Exclude axis ticks and legend keys as measurements. Preserve missing values as null; do not invent hidden sample data.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "panel",
+            "chart_type",
+            "title",
+            "series",
+            "category",
+            "row_label",
+            "x",
+            "y",
+            "value",
+            "statistic",
+            "unit",
+            "reading",
+            "notes"
+          ],
+          "properties": {
+            "panel": {
+              "type": "string",
+              "description": "Panel identifier from the observations, or positional identifier 1, 2, etc. Keep separate panels distinct."
+            },
+            "chart_type": {
+              "type": "string",
+              "enum": [
+                "bar_chart",
+                "line_chart",
+                "pie_chart",
+                "scatter_plot",
+                "box_plot",
+                "heatmap",
+                "table",
+                "unknown"
+              ],
+              "description": "Type described by the VLM, not necessarily the Docling classification."
+            },
+            "title": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "series": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Legend series or box-plot group; null if absent."
+            },
+            "category": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Bar/line category, pie slice label, or heatmap column label."
+            },
+            "row_label": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Heatmap row label, or table row label."
+            },
+            "x": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Numeric scatter x coordinate, otherwise null."
+            },
+            "y": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Numeric scatter y coordinate, otherwise null."
+            },
+            "value": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Bar height, line value, slice value, heatmap cell, or box statistic. Null when missing; never reconstruct from expectations."
+            },
+            "statistic": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "minimum",
+                "q1",
+                "median",
+                "q3",
+                "maximum",
+                "lower_whisker",
+                "upper_whisker",
+                "outlier",
+                null
+              ],
+              "description": "Box statistic only. Whiskers are not assumed to be sample minima/maxima."
+            },
+            "unit": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Literal unit, including percent or thousand USD; do not rescale values."
+            },
+            "reading": {
+              "type": "string",
+              "enum": [
+                "printed",
+                "estimated",
+                "unknown"
+              ],
+              "description": "Printed only for an explicit numeric annotation. Estimated when read from geometry; unknown if absent or unclear."
+            },
+            "notes": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Uncertainty, coordinate units, or qualifications from the observations."
+            }
+          }
+        }
+      }
+    }
+  },
+  "model_response": "{\n  \"data\": {\n    \"measurements\": [\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"North\", \"category\": \"Jan\", \"row_label\": null, \"x\": 0, \"y\": 120, \"value\": 120, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"North\", \"category\": \"Feb\", \"row_label\": null, \"x\": 1, \"y\": 150, \"value\": 150, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"North\", \"category\": \"Mar\", \"row_label\": null, \"x\": 2, \"y\": 135, \"value\": 135, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"North\", \"category\": \"Apr\", \"row_label\": null, \"x\": 3, \"y\": 180, \"value\": 180, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"North\", \"category\": \"May\", \"row_label\": null, \"x\": 4, \"y\": 210, \"value\": 210, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"South\", \"category\": \"Jan\", \"row_label\": null, \"x\": 0, \"y\": 95, \"value\": 95, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"South\", \"category\": \"Feb\", \"row_label\": null, \"x\": 1, \"y\": 125, \"value\": 125, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"South\", \"category\": \"Mar\", \"row_label\": null, \"x\": 2, \"y\": 145, \"value\": 145, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"South\", \"category\": \"Apr\", \"row_label\": null, \"x\": 3, \"y\": 155, \"value\": 155, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null},\n      {\"panel\": \"1\", \"chart_type\": \"bar_chart\", \"title\": \"Revenue (in thousand USD) for North and South over five months\", \"series\": \"South\", \"category\": \"May\", \"row_label\": null, \"x\": 4, \"y\": 190, \"value\": 190, \"statistic\": null, \"unit\": \"thousand USD\", \"reading\": \"estimated\", \"notes\": null}\n    ]\n  },\n  \"unmapped_observations\": []\n}",
+  "error": null
+}

@@ -1,0 +1,87 @@
+Traceback (most recent call last):
+  File "/home/kirilllos/projects/AI/parser/parser/tmp/pdfs/run_live_pipeline.py", line 148, in run
+    result = await run_pipeline(str(input_path), run_id=run_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/__main__.py", line 26, in run_pipeline
+    return await build_graph().ainvoke(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        {"run_id": run_id, "input_path": input_path}, {"recursion_limit": 1_000_000}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/main.py", line 3184, in ainvoke
+    async for chunk in self.astream(
+    ...<29 lines>...
+            chunks.append(chunk)
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/main.py", line 2997, in astream
+    async for _ in runner.atick(
+    ...<13 lines>...
+            yield o
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/_runner.py", line 304, in atick
+    await arun_with_retry(
+    ...<15 lines>...
+    )
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/_retry.py", line 163, in arun_with_retry
+    return await task.proc.ainvoke(task.input, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/_internal/_runnable.py", line 705, in ainvoke
+    input = await asyncio.create_task(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        step.ainvoke(input, config, **kwargs), context=context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/main.py", line 3184, in ainvoke
+    async for chunk in self.astream(
+    ...<29 lines>...
+            chunks.append(chunk)
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/main.py", line 2997, in astream
+    async for _ in runner.atick(
+    ...<13 lines>...
+            yield o
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/_runner.py", line 304, in atick
+    await arun_with_retry(
+    ...<15 lines>...
+    )
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/pregel/_retry.py", line 163, in arun_with_retry
+    return await task.proc.ainvoke(task.input, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/_internal/_runnable.py", line 705, in ainvoke
+    input = await asyncio.create_task(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        step.ainvoke(input, config, **kwargs), context=context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/langgraph/_internal/_runnable.py", line 473, in ainvoke
+    ret = await self.afunc(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/main_agent.py", line 119, in select
+    return await decide(state, tool_name=tool_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/main_agent.py", line 44, in decide
+    message = await ask_main_agent_tool(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/tmp/pdfs/run_live_pipeline.py", line 94, in wrapped
+    result = await function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/src/agent/model.py", line 85, in ask_main_agent_tool
+    response = await client.chat.completions.create(**request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/resources/chat/completions/completions.py", line 2931, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+    ...<55 lines>...
+    )
+    ^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/_base_client.py", line 1979, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kirilllos/projects/AI/parser/parser/.venv/lib/python3.13/site-packages/openai/_base_client.py", line 1764, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'error': {'message': '{"error":{"code":400,"message":"request (6728 tokens) exceeds the available context size (4096 tokens), try increasing it","type":"exceed_context_size_error","n_prompt_tokens":6728,"n_ctx":4096}}', 'type': 'invalid_request_error', 'param': None, 'code': None}}
+During task with name 'main_agent' and id '3bc2d150-1d91-8748-4314-6012c5c11ebd'
+During task with name 'match_vlm_models' and id 'e0689ead-ae05-d371-9683-1992491b3ad7'

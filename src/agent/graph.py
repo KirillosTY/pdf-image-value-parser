@@ -1,7 +1,7 @@
-"""Expose the actual extraction, routing, formatting and SQL flow in Studio.
+"""Expose MainAgent startup tools and the extraction-to-SQL flow in Studio.
 
-Docling produces bounded batches in the background. Every downstream operation
-runs in its named graph node; thinking flags select visible routing branches.
+Named nodes route and publish ready work to live consumers. A shared thinking
+setting controls both routing branches; the writer joins complete manifests.
 """
 
 from dataclasses import replace
@@ -9,11 +9,10 @@ from datetime import datetime, timezone
 
 from langgraph.graph import END, START, StateGraph
 
-from agent import hooks, stages
-from agent.main_agent import build_tool_step
-from agent.queues import create_formatter_queues, create_vlm_queues
-from agent.routing import match_formatter_models, match_vlm_models
+from agent import hooks, stages, startup_orchestration
+from agent.progress_messages import show_progress
 from agent.startup import prepare_agent
+from agent.startup_tools import STARTUP_TOOL_NAMES
 from agent.state import State
 
 
@@ -25,7 +24,7 @@ async def ensure_redis(state: State) -> dict:
 
 
 async def start_docling(state: State) -> dict:
-    """Start the Docling producer and run lease; downstream work stays in the graph."""
+    """Start the runtime; batch extraction waits for the following Docling node."""
     update = await hooks.start_docling(state)
     docling = update.get("docling", state.docling)
     return {**update, "status": "running", "docling": replace(docling, status="running")}
@@ -37,24 +36,22 @@ async def finish_run(state: State) -> dict:
     status = "failed" if state.status == "failed" else (
         "completed_with_errors" if state.errors else "completed"
     )
+    show_progress(state.config, f"Pipeline finished: {status.replace('_', ' ')}.")
     return {**update, "status": status,
             "completed_at": datetime.now(timezone.utc).isoformat()}
 
 
 def build_graph(*, checkpointer=None):
-    """Compile a descriptive stage graph with separately visible thinking branches."""
-    return (
+    """Expose MainAgent-selected startup tools followed by the document stages."""
+    builder = (
         StateGraph(State)
         .add_node("prepare_agent", prepare_agent)
         .add_node("initialize", stages.initialize_staged_run)
-        .add_node("match_vlm_models", build_tool_step("set_vlm_routes", match_vlm_models))
-        .add_node("match_formatter_models", build_tool_step("set_formatter_routes", match_formatter_models))
-        .add_node("ensure_redis", build_tool_step("ensure_redis", ensure_redis))
-        .add_node("create_vlm_queues", build_tool_step("create_vlm_queues", create_vlm_queues))
-        .add_node("create_formatter_queues", build_tool_step("create_formatter_queues", create_formatter_queues))
-        .add_node("schedule_models", build_tool_step("schedule_models", stages.schedule_models))
-        .add_node("start_docling", build_tool_step("start_docling", start_docling))
+        .add_node("main_agent_startup", startup_orchestration.select_startup_tool)
+        .add_node("startup_tool_result", lambda state: {})
+        .add_node("startup_failed", startup_orchestration.record_startup_failure)
         .add_node("docling", stages.docling)
+        .add_node("await_ready_work", stages.await_ready_work)
         .add_node("main_agent_route_images", stages.main_agent_route_images)
         .add_node("route_images_directly", stages.route_images_directly)
         .add_node("vlm", stages.vlm)
@@ -63,21 +60,18 @@ def build_graph(*, checkpointer=None):
         .add_node("formatter", stages.formatter)
         .add_node("map_database_fields", stages.map_database_fields)
         .add_node("write_database", stages.write_database)
-        .add_node("finish_run", build_tool_step("finish_run", finish_run))
+        .add_node("finish_run", finish_run)
         .add_edge(START, "prepare_agent")
         .add_edge("prepare_agent", "initialize")
-        .add_edge("initialize", "match_vlm_models")
-        .add_edge("match_vlm_models", "match_formatter_models")
-        .add_edge("match_formatter_models", "ensure_redis")
-        .add_edge("ensure_redis", "create_vlm_queues")
-        .add_edge("create_vlm_queues", "create_formatter_queues")
-        .add_edge("create_formatter_queues", "schedule_models")
-        .add_edge("schedule_models", "start_docling")
-        .add_edge("start_docling", "docling")
+        .add_edge("initialize", "main_agent_startup")
+        .add_edge("startup_failed", END)
         .add_conditional_edges("docling", stages.choose_image_route, {
             "thinking_enabled": "main_agent_route_images",
             "direct": "route_images_directly",
-            "no_more_images": "write_database",
+        })
+        .add_conditional_edges("await_ready_work", stages.choose_image_route, {
+            "thinking_enabled": "main_agent_route_images",
+            "direct": "route_images_directly",
         })
         .add_edge("main_agent_route_images", "vlm")
         .add_edge("route_images_directly", "vlm")
@@ -90,11 +84,24 @@ def build_graph(*, checkpointer=None):
         .add_edge("formatter", "map_database_fields")
         .add_edge("map_database_fields", "write_database")
         .add_conditional_edges("write_database", stages.after_database, {
-            "next_batch": "docling", "finished": "finish_run",
+            "more_work": "await_ready_work", "finished": "finish_run",
         })
         .add_edge("finish_run", END)
-        .compile(name="MainAgent document pipeline", checkpointer=checkpointer)
     )
+    tool_nodes = [*STARTUP_TOOL_NAMES, "invalid_startup_tool"]
+    for name in tool_nodes:
+        builder.add_node(name, startup_orchestration.execute_selected_tool)
+        builder.add_edge(name, "startup_tool_result")
+    builder.add_conditional_edges("startup_tool_result", startup_orchestration.after_startup_tool, {
+        "main_agent_startup": "main_agent_startup", "docling": "docling",
+        "startup_failed": "startup_failed",
+    })
+    builder.add_conditional_edges("main_agent_startup", startup_orchestration.selected_startup_node, {
+        name: name for name in [*tool_nodes, "main_agent_startup", "startup_failed"]
+    })
+    return builder.compile(
+        name="MainAgent document pipeline", checkpointer=checkpointer,
+    ).with_config({"recursion_limit": 1_000_000})
 
 
 graph = build_graph()

@@ -745,6 +745,7 @@ dependencies = [
     { name = "redis" },
     { name = "redisvl" },
     { name = "sqlalchemy" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
 
 [package.dev-dependencies]
@@ -770,6 +771,7 @@ requires-dist = [
     { name = "redis", specifier = ">=8.1.0" },
     { name = "redisvl", specifier = ">=0.27.2" },
     { name = "sqlalchemy", specifier = ">=2,<3" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2" },
 ]
 
 [package.metadata.requires-dev]

@@ -1,0 +1,58 @@
+# User-editable settings for NEW runs. Resumed runs use their saved snapshots.
+# Keep credentials and endpoint URLs in .env. Booleans are lowercase true/false.
+# Model file path is relative to this file.
+models_file = "models.toml"
+
+# true: finish and unload each model before the next stage; false: stream stages concurrently.
+batch_processing = true
+# true: MainAgent selects models per image; false: use the routing maps in models.toml.
+# A configured MainAgent still owns startup regardless of this switch.
+think_sorting = true
+# Print brief MainAgent actions and stage progress; hides VLM/formatter response text.
+show_thinking = true
+# Additional attempts after the first failure, independently for VLMs and formatters.
+max_image_retries = 3
+# false: block documents with failed images; "omit": save successful data plus failed-image records.
+approve_with_fails = false
+# Maximum PDFs per extraction batch / unfinished manifests in streaming mode (1 to 50).
+manifest_capacity = 50
+# true: include PDFs in subdirectories.
+recursive = false
+# Maximum MainAgent startup decisions, including diagnosis and retries.
+startup_max_turns = 24
+# Maximum attempts for each startup tool.
+startup_max_tool_attempts = 3
+charts_targeted = ["bar_chart", "line_chart", "pie_chart", "scatter_plot", "box_plot", "heatmap", "multi_panel"]
+docling_charts = ["line_chart", "bar_chart", "pie_chart", "scatter_plot", "box_plot", "table"]
+document_types = ["scientific", "business"]
+languages = ["English"]
+accuracy_speed_preference = "accuracy-first; local quantized baseline using the English test PDF"
+# Path relative to the project root when launching from the project directory.
+schema_bundle = "schemas/test-pdf/bundle.json"
+fallback_schema = "MEASUREMENTS"
+# Legacy setting; streaming starts with the first manifest.
+manifest_minimum = 1
+# Legacy standalone writer setting; the pipeline writes one complete document per transaction.
+writer_batch_size = 1
+# Jobs per queue-draining turn; does not enable sequential model loading by itself.
+model_batch_size = 50
+
+[redis_recovery]
+# enabled=false disables automatic service repair; connection checks still run.
+enabled = true
+compose_file = "configuration/test-services.compose.yml"
+project = "parser-chart-test"
+service = "redis"
+env_file = ".env"
+port = 16379
+
+[schema_matcher]
+line_chart = "MEASUREMENTS"
+bar_chart = "MEASUREMENTS"
+pie_chart = "MEASUREMENTS"
+scatter_plot = "MEASUREMENTS"
+box_plot = "MEASUREMENTS"
+table = "MEASUREMENTS"
+
+[extraction]
+# Optional Docling ExtractionConfig overrides; omitted settings use its defaults.

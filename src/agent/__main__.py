@@ -10,15 +10,20 @@ from sqlalchemy import create_engine
 
 from agent.graph import build_graph
 from agent.runtime import _RUNTIMES
-from config import CONFIG
+from config import load_config, require_completed_setup
 
 
-async def run_pipeline(input_path: str, *, run_id: str | None = None) -> dict:
+async def run_pipeline(input_path: str, *, run_id: str | None = None,
+                       config_path: str | None = None) -> dict:
     """Execute a run; always release this invocation's owned background workers."""
+    if run_id is not None and config_path is not None:
+        raise ValueError("Existing runs use their saved configuration; --config requires a new run")
     if run_id is None:
+        require_completed_setup()
+        config = load_config(config_path)
         engine = create_engine(os.environ["DATABASE_URL"])
         try:
-            run_id = await asyncio.to_thread(start_run, engine, config=CONFIG)
+            run_id = await asyncio.to_thread(start_run, engine, config=config)
         finally:
             engine.dispose()
     try:
@@ -36,9 +41,11 @@ def main():
     load_dotenv()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input_path")
-    parser.add_argument("--run-id", help="An approved, unstarted run ID")
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument("--run-id", help="An approved, unstarted run ID; uses its saved settings")
+    selection.add_argument("--config", help="Run TOML file for a new run (default: configuration/run.toml)")
     args = parser.parse_args()
-    result = asyncio.run(run_pipeline(args.input_path, run_id=args.run_id))
+    result = asyncio.run(run_pipeline(args.input_path, run_id=args.run_id, config_path=args.config))
     print(f"{result['run_id']}: {result['status']}")  # noqa: T201
 
 

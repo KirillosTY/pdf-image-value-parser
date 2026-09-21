@@ -28,7 +28,13 @@ from redis.exceptions import ResponseError
 from sqlalchemy import create_engine
 
 from agent import inference
-from agent.resources import ModelServers, compatible_groups, endpoint_options, validate_resource_plan
+from agent.progress_messages import show_progress
+from agent.resources import (
+    ModelServers,
+    compatible_groups,
+    endpoint_options,
+    validate_resource_plan,
+)
 from agent.routing import route_image, route_result
 from agent.state import State, WorkerEvent
 
@@ -139,9 +145,17 @@ class Runtime:
             self.state.resource_plan = compatible_groups(
                 self.config, self.state.current_hardware, model_keys,
             )
-        workers = [("lease", self.heartbeat), ("docling", self.produce)]
-        if not self.state.graph_managed_stages:
+        workers = [("lease", self.heartbeat)]
+        if self.config.get("batch_processing"):
+            if not self.state.graph_managed_stages:
+                raise ValueError("Batch processing requires the staged graph")
+            # BatchRuntime executes extraction and inference in foreground nodes.
+        elif self.state.graph_managed_stages:
+            workers.append(("docling", self.produce))
+            workers.append(("models", self.consume_models))
+        else:
             workers.extend([
+                ("docling", self.produce),
                 ("router", self.route_manifests),
                 ("models", self.consume_models),
                 ("writer", self.write_ready),
@@ -179,14 +193,15 @@ class Runtime:
     async def enqueue_once(self, queue, identity, payload):
         """Publish a job and its deduplication marker in one Redis operation."""
         digest = hashlib.sha256(identity.encode()).hexdigest()
-        await self.client.eval(
+        inserted = await self.client.eval(
             _ONCE,
             2,
             self.key("sent:" + digest),
             queue,
             json.dumps(payload, allow_nan=False),
         )
-        self.wakeup.set()
+        if inserted:
+            self.wakeup.set()
 
     async def emit(self, kind, *, source=None, **payload):
         """Publish a stable event only once, including after a replayed action."""
@@ -353,7 +368,7 @@ class Runtime:
         self.wakeup.set()
 
     async def enable_models(self):
-        """Latch the one-time 20-manifest gate, including a smaller final batch."""
+        """Record that model processing has started."""
         await self.client.set(self.key("models_enabled"), "1")
         self.wakeup.set()
 
@@ -513,10 +528,12 @@ class Runtime:
             if not worked:
                 await self.pause()
 
-    async def drain_model(self, model, queue):
+    async def drain_model(self, model, queue, *, max_jobs=None):
         """Bound requests per model and retry pending jobs before taking new ones."""
         limit = self.config["models"][model].get("requests_per_model", 1)
-        batch = self.config.get("model_batch_size", 50)
+        if self.config.get("batch_processing"):
+            limit = 1
+        batch = max_jobs or self.config.get("model_batch_size", 50)
 
         async def consumer(slot, count):
             for _ in range(count):
@@ -629,6 +646,10 @@ class Runtime:
                 image = await self.blocking(
                     update_manifest_image, self.sync, key, image_key, fail
                 )
+                if image.get("failed"):
+                    show_progress(self.config, f"{stage.capitalize()} stage: {type(exc).__name__}; image exhausted its retries.")
+                else:
+                    show_progress(self.config, f"{stage.capitalize()} stage: {type(exc).__name__}; retrying image ({image.get(counter, 0)}/{self.config['max_image_retries']}).")
                 if image.get("failed"):
                     await self.emit(
                         "worker.item_failed",
@@ -827,6 +848,9 @@ class Runtime:
             finish_run, self.engine, self.state.run_id, outcome=outcome, errors=errors
         )
 
+    async def release_resources(self):
+        """Release optional runtime-specific leases after owned work has stopped."""
+
     async def close(self):
         """Stop owned tasks and servers while retaining Redis recovery data."""
         if self.closed:
@@ -843,6 +867,7 @@ class Runtime:
             task.cancel()
         await asyncio.gather(*leases, return_exceptions=True)
         try:
+            await self.release_resources()
             await self.client.eval(_RELEASE, 1, self.key("lease"), self.token)
         finally:
             await self.client.aclose()
@@ -856,9 +881,14 @@ async def get_runtime(state):
     runtime = _RUNTIMES.get(key)
     if runtime is None or runtime.closed:
         if state.graph_managed_stages:
-            from agent.stage_runtime import StageRuntime
+            if state.config.get("batch_processing"):
+                from agent.batch_runtime import BatchRuntime
 
-            runtime = StageRuntime(state)
+                runtime = BatchRuntime(state)
+            else:
+                from agent.stage_runtime import StageRuntime
+
+                runtime = StageRuntime(state)
         else:
             runtime = Runtime(state)
         try:

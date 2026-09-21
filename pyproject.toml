@@ -34,6 +34,7 @@ dependencies = [
     "jsonschema>=4.26,<5",
     "sqlalchemy>=2,<3",
     "psycopg[binary]>=3,<4",
+    "tomli>=2; python_version < '3.11'",
 ]
 
 [build-system]
@@ -41,7 +42,7 @@ requires = ["setuptools>=83.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["schema_format", "config", "hardware"]
+py-modules = ["schema_format", "config", "config_files", "hardware"]
 packages = [
     "agent",
     "figure_parser",

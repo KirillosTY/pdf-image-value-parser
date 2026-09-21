@@ -149,51 +149,32 @@ MainAgent fires a worker that checks if a single manifest is complete, in the ca
 Writer fires when no more images are in other queues, or it's manifest queue has reached at least 50.
 
 ----------
-What is still missing?
+Current implementation (2026-09-16; supersedes older workflow details above)
 
-Correction (2026-09-15): the earlier statement that all sections were implemented
-was inaccurate. The worker pipeline existed, but the central tool-calling
-MainAgent had been replaced by deterministic orchestration with optional routing
-requests.
+- Setup is conducted by the coding assistant on first use or when RERUN_SETUP
+  is set in src/config.py; SETUP_COMPLETED records completion.
+- One think_sorting setting controls both routing decisions. One shared
+  MainAgent selects VLM and formatter queues, one decision at a time.
+- Processing starts with the first published manifest. Model consumers stay
+  active, and formatters process available outputs before the VLM batch finishes.
+- Named graph nodes expose routing, VLM/formatter queue handoffs, mapping and SQL.
+  They do not impose whole-batch stage barriers. The repeat edge leads to
+  await_ready_work, not back to Docling extraction.
+- Each complete manifest is committed immediately in one transaction. With
+  approve_with_fails=False, an exhausted image failure blocks only its manifest;
+  other manifests continue. Failure evidence is retained.
+- Local formatters request schema-constrained JSON; the parser safely accepts
+  a single Markdown fence while retaining all data/schema validation.
+- Routine Redis/queue/lifecycle operations no longer require model decisions.
 
-The MainAgent now operates through named setup/tool subgraphs and explicit
-per-image routing nodes. src/tools/tools.py provides native setup tools; image
-and result routing use native queue-selection tools from agent/model.py.
-The Studio graph shows Docling → MainAgent/direct image routing → VLM →
-MainAgent/direct output routing → formatter → database mapping → SQL writing.
-Actual processing occurs inside these stage nodes; only Docling and the lease
-run in the background. Batches retain Redis queues, retries and SQL semantics.
-Setup tool decisions and execution remain separate checkpointable nodes. The selected model is the installed
-qwen3-abliterated:latest, as clarified by the user. New test code is retained, but
-testing and live-model checks were paused at the user's request; this path is
-not yet verified end to end. See ../MAIN_AGENT.md for behavior and limitations.
+See ../MAIN_AGENT.md for the current implementation and recovery instructions.
+Tests and live-model checks remain paused. Static inspection and graph export
+are not an end-to-end verification or a throughput measurement.
 
-Remaining gaps and deployment considerations (updated 2026-09-15):
-
-Code
-- Checkpointer not wired: src/agent/__main__.py calls build_graph() with no
-  checkpointer, so graph state has no crash recovery (only Redis/runtime leases
-  recover). Biggest real item.
-- approve_with_fails supports only False/"omit"; no "proceed-with-fails" mode.
-- The active graph waits for Docling batches and executes each downstream stage
-  directly. Legacy worker-event helpers remain outside the active Studio graph.
-- The explicit-stage topology requires a new run/thread; old coordinator
-  checkpoints have no migration to the new stage graph.
-
-Config / deployment
-- CONFIG retains the local chart workload (manifest_minimum=1,
-  writer_batch_size=1) and selected MainAgent, with three VLMs and three
-  formatters after the user's requested additions. Both routing-thinking flags
-  are enabled. See configuration/additional-models.md for candidates and setup.
-- The two added VLMs target under 4 GB RAM each; peak RAM is unverified and the
-  external Ollama path does not enforce a per-model memory cap. Testing remains
-  paused, so this requirement has not yet been demonstrated.
-- Existing local service setup is documented in configuration/test-pdf.md.
-  Service readiness was not rechecked during this implementation.
-- MainAgent endpoint context allocation and native tool behavior remain unverified.
-- Managed-serving path (serving="managed", launch_command, RAM/VRAM estimates)
-  is untested; current fixture is all external/Ollama.
-
-Confirmed built (not gaps): VLM/formatter routing maps, per-model Redis queues,
-docling gate (min/cap) + top-3 confidence, retry/priority-requeue, memory-group
-scheduling + model load/switch, whole-document batch writer, recovery leases.
+Remaining limitations:
+- The CLI still has no durable checkpointer; use the graph API for checkpointed
+  recovery. This topology requires a new run/thread.
+- The two added VLMs' under-4-GB RAM requirement remains unmeasured and is not
+  enforced by the external Ollama endpoint.
+- Service readiness, native-tool behavior, managed serving and model accuracy
+  have not been rechecked during this change.

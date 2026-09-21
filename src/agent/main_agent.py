@@ -11,6 +11,7 @@ from parser.src.tools.tools import (
 )
 
 from agent.model import ask_main_agent_tool
+from agent.progress_messages import show_progress
 from agent.state import State
 
 MAX_INPUT_ERRORS = 3
@@ -29,13 +30,13 @@ def _unique_object(pairs):
     return result
 
 
-async def decide(state: State, *, tool_name: str | None = None) -> dict:
+async def decide(state: State, *, tool_name: str | None = None, tool_specs=None) -> dict:
     """Save the selected call before executing any pipeline side effect."""
     if state.agent_input_errors >= MAX_INPUT_ERRORS:
         raise RuntimeError("MainAgent failed to produce a valid tool decision after 3 attempts")
     if state.agent_tool_call:
         raise ValueError("Execute the checkpointed tool call before another decision")
-    offered = available_tools(state)
+    offered = available_tools(state) if tool_specs is None else tool_specs
     if tool_name is not None:
         offered = [tool for tool in offered if tool["function"]["name"] == tool_name]
         if not offered:
@@ -48,6 +49,7 @@ async def decide(state: State, *, tool_name: str | None = None) -> dict:
             + json.dumps(observation(state), allow_nan=False),
         )
     except ValueError as exc:
+        show_progress(state.config, "MainAgent returned an invalid tool response; asking it to correct the call.")
         return {
             "agent_input_errors": state.agent_input_errors + 1,
             "agent_messages": [*state.agent_messages, {
@@ -109,33 +111,3 @@ def route_after_decision(state: State) -> str:
 def route_after_tool(state: State) -> str:
     """End only after the finish tool has recorded a terminal outcome."""
     return "__end__" if state.completed_at else "main_agent"
-
-
-def build_tool_step(tool_name: str, fallback):
-    """Expose a named operation with a checkpointed MainAgent call inside it."""
-    from langgraph.graph import END, START, StateGraph
-
-    async def select(state):
-        return await decide(state, tool_name=tool_name)
-
-    async def execute(state):
-        return await act(state, tool_name=tool_name)
-
-    def after_execution(state):
-        return "main_agent" if state.agent_input_errors else END
-
-    return (
-        StateGraph(State)
-        .add_node("main_agent", select)
-        .add_node("main_agent_tool", execute)
-        .add_node("configured_operation", fallback)
-        .add_conditional_edges(
-            START,
-            lambda state: "main_agent" if state.config.get("main_agent") else "configured_operation",
-            ["main_agent", "configured_operation"],
-        )
-        .add_conditional_edges("main_agent", route_after_decision, ["main_agent", "main_agent_tool"])
-        .add_conditional_edges("main_agent_tool", after_execution, ["main_agent", END])
-        .add_edge("configured_operation", END)
-        .compile(name=tool_name)
-    )

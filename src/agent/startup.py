@@ -40,11 +40,11 @@ async def prepare_agent(state: State) -> dict:
 
     return {
         "config": config,
-        "fill_threshold": config["manifest_minimum"],
+        "fill_threshold": 1,
         "schema_id": run_context["schema_id"],
         "current_hardware": current_hardware,
         "system_prompt": build_system_prompt(
-            run_context,
+            {**run_context, "config": config},
             current_hardware,
         ),
     }

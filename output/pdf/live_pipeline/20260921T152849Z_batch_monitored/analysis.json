@@ -1,0 +1,95 @@
+{
+  "folder": "output/pdf/live_pipeline/20260921T152849Z_batch_monitored",
+  "run_id": "cd939dbb8d1141fda31ef6fd38914e76",
+  "last_event": {
+    "event": "resources",
+    "elapsed_s": 518.369,
+    "memory": {
+      "MemTotal_KiB": 31929024,
+      "MemAvailable_KiB": 14358312,
+      "SwapTotal_KiB": 8388604,
+      "SwapFree_KiB": 6377628
+    },
+    "cpu_busy_percent": 34.18,
+    "load_average": [
+      7.01806640625,
+      4.89892578125,
+      2.93017578125
+    ],
+    "models": [
+      {
+        "name": "parser-chart-vlm:7b",
+        "size": 4987142798,
+        "size_vram": 4987142798,
+        "context_length": 8192
+      }
+    ],
+    "gpus": [
+      {
+        "used_mib": 4899.0,
+        "total_mib": 8188.0,
+        "gpu_util_percent": 0.0,
+        "memory_util_percent": 0.0,
+        "temperature_c": 55.0
+      }
+    ]
+  },
+  "elapsed_s": 518.369,
+  "resource_samples": 104,
+  "timings": {
+    "main_agent": {
+      "calls": 18,
+      "total_s": 416.77,
+      "max_s": 59.152
+    },
+    "startup_tool": {
+      "calls": 8,
+      "total_s": 0.12,
+      "max_s": 0.044
+    },
+    "docling": {
+      "calls": 1,
+      "total_s": 13.23,
+      "max_s": 13.227
+    },
+    "route": {
+      "calls": 10,
+      "total_s": 153.55,
+      "max_s": 24.847
+    }
+  },
+  "errors": [],
+  "startup_tools": [
+    "set_vlm_routes",
+    "set_formatter_routes",
+    "ensure_redis",
+    "inspect_startup_resources",
+    "create_vlm_queues",
+    "create_formatter_queues",
+    "schedule_models",
+    "start_docling"
+  ],
+  "completed_events": {
+    "main_agent.complete": 18,
+    "startup_tool.complete": 8,
+    "docling.complete": 1,
+    "route.complete": 10
+  },
+  "resources": {
+    "min_available_ram_gib": 12.833,
+    "max_swap_used_gib": 1.92,
+    "max_resident_ollama_models": 1,
+    "models_seen": [
+      "parser-chart-vlm:7b",
+      "parser-main-agent:latest"
+    ],
+    "max_gpu_memory_mib": 6679.0,
+    "max_gpu_util_percent": 100.0,
+    "max_cpu_busy_percent": 36.04,
+    "model_sampling_errors": 0
+  },
+  "docling_resources": {
+    "samples": 2,
+    "max_resident_ollama_models": 0
+  }
+}
